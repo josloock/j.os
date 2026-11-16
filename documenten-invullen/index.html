@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="nl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documenten invullen · J.OS</title>
+<meta name="description" content="Een document volledig voor je invullen en laten tekenen.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F2EEE6">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Documenten invullen · J.OS">
+<meta property="og:description" content="Een document volledig voor je invullen en laten tekenen.">
+<meta property="og:image" content="https://os.josloock.nl/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="../assets/fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<script>try{if(sessionStorage.getItem("jos-arrive")){sessionStorage.removeItem("jos-arrive");document.documentElement.classList.add("arrive")}}catch(e){}</script>
+</head>
+<body>
+<div class="page">
+
+<header class="col">
+<div class="topbar">
+<a class="home-link" href="../index.html" aria-label="J.OS, terug naar het begin"><span class="mark" aria-hidden="true">J.<canvas data-orb="mini"></canvas>S</span></a>
+<p class="caps">Toepassing 1</p>
+</div>
+
+<div class="intro">
+<h1>Documenten invullen</h1>
+<p class="lede">Een document volledig voor je invullen en laten tekenen.</p>
+<p class="more">Je krijgt het ingevuld en ondertekend terug, met een kort rapport: wat is ingevuld, wat jij nog moet invullen en waar je op moet letten voordat je tekent.</p>
+<ul class="meta caps">
+<li>Word en PDF</li>
+<li>Werkt met Claude</li>
+</ul>
+</div>
+</header>
+
+<main class="col">
+
+<!-- Demo: zet hier de video neer zodra die er is.
+<section class="demo" aria-label="Demo">
+<video src="demo.mp4" poster="demo.jpg" controls preload="none"></video>
+</section>
+-->
+
+<section class="section" aria-labelledby="stappen">
+<h2 class="caps caps-wide center" id="stappen">In drie stappen</h2>
+
+<div class="routes" role="tablist" aria-label="Kies hoe je begint">
+<button class="route" type="button" role="tab" id="tab-skill" aria-controls="route-skill" aria-selected="true">Met de skill</button>
+<button class="route" type="button" role="tab" id="tab-prompt" aria-controls="route-prompt" aria-selected="false">Met een prompt</button>
+</div>
+
+<div id="route-skill" role="tabpanel" aria-labelledby="tab-skill">
+<p class="route-lede">Eén keer instellen. Daarna onthoudt Claude je gegevens en je handtekening.</p>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Download de skill</h3>
+<p>Eén bestand. Meer heb je niet nodig.</p>
+<a class="button" href="../downloads/documenten-invullen.zip" download>
+<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v9"/><path d="M5 7.5l4 4 4-4"/><path d="M3 15h12"/></svg>
+Download de skill
+</a>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Zet hem in Claude</h3>
+<p>Open Claude en ga naar Customize, dan Skills. Klik op de plus, kies Create skill en dan Upload a skill, en kies het bestand dat je net hebt gedownload.</p>
+<p class="hint">Zie je Skills niet? Zet dan bij Settings, Capabilities de optie Code execution and file creation aan.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Geef Claude een document</h3>
+<p>Sleep een Word- of PDF-bestand in het gesprek en zeg:</p>
+<p class="say">&lsquo;Vul dit <span class="u">voor me in.<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
+<p class="after">De eerste keer vraagt de skill om je gegevens en je handtekening. Daarna loodst hij je door de rest.</p>
+</div>
+</li>
+
+</ol>
+</div>
+
+<div id="route-prompt" role="tabpanel" aria-labelledby="tab-prompt">
+<p class="route-lede">Meteen proberen, zonder iets te installeren. Je vult je gegevens elke keer zelf in.</p>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Kopieer de prompt</h3>
+<p>Bewaar hem ergens waar je hem terugvindt, met je gegevens er al in.</p>
+<button class="button" type="button" data-copy="#prompt">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer de prompt</span>
+</button>
+<pre class="prompt" id="prompt" tabindex="0">Je gaat een document voor mij invullen en ondertekenen. Het document zit als bijlage bij dit bericht. Mijn handtekening zit er als afbeelding bij, als ik wil dat je tekent.
+
+MIJN GEGEVENS
+Vul in wat je kwijt wilt en laat de rest leeg.
+Naam:
+Adres:
+Postcode en woonplaats:
+E-mailadres:
+Telefoon:
+Plaats van ondertekening:
+Bedrijfsnaam en KvK-nummer, alleen als ik namens een bedrijf teken:
+Functie:
+
+ZO WERK JE
+1. Werk op een kopie. Laat mijn origineel zoals het is en behoud de opmaak.
+2. Vul alleen in wat hierboven staat of wat ik in dit gesprek zeg. Verzin nooit gegevens. Wat je niet weet, blijft leeg.
+3. Vul nooit een BSN, paspoortnummer of DigiD in.
+4. Schrijf de datum van vandaag voluit, bijvoorbeeld 13 augustus 2026, tenzij het veld om een andere notatie vraagt.
+5. Zet mijn handtekening op de handtekeninglijn, zonder dat hij over tekst valt. Heb ik geen handtekening meegestuurd, laat die plek dan leeg en zeg dat erbij.
+6. Bekijk het resultaat zelf voordat je het teruggeeft. Staat alles op de juiste plek?
+7. Geef het ingevulde document terug als bestand, in hetzelfde formaat.
+
+Kun je het bestand niet zelf bewerken? Zeg dat dan eerlijk en geef me per veld wat ik moet invullen.
+
+SLUIT AF MET DIT RAPPORT
+Ingevuld: in één zin wat je hebt ingevuld en of de handtekening staat.
+Nog invullen door jou: elk veld dat leeg bleef, met de pagina en de reden.
+Let op in dit document: drie tot vijf punten die financieel of juridisch het zwaarst wegen, met de vindplaats erbij. Denk aan looptijd en stilzwijgende verlenging, opzegtermijn, aansprakelijkheid, boetes, eenzijdige wijzigingen en bijlagen die ontbreken. Dit is geen juridisch advies.</pre>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Plak hem in je AI</h3>
+<p>Open Claude of ChatGPT, plak de prompt en vul bovenaan je gegevens in.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Voeg je document toe</h3>
+<p>Sleep het Word- of PDF-bestand erbij, en een foto van je handtekening als je wilt dat hij tekent. Verstuur.</p>
+</div>
+</li>
+
+</ol>
+</div>
+</section>
+
+<section class="section" aria-labelledby="weten">
+<h2 class="caps caps-wide center" id="weten">Goed om te weten</h2>
+<ul class="notes">
+<li>Het verzint nooit gegevens. Wat het niet weet, blijft leeg.</li>
+<li>Een BSN, paspoortnummer of DigiD vult het nooit in.</li>
+<li>Je origineel blijft zoals het was. De AI werkt op een kopie.</li>
+<li>Je gegevens en je handtekening blijven in je eigen AI-account. Ik krijg ze niet te zien.</li>
+<li>Dit is geen juridisch advies. Lees altijd zelf wat je tekent.</li>
+</ul>
+<p class="aside">Nieuw hier? <a href="../begin-hier/index.html#spelregels">Lees eerst de spelregels</a>.</p>
+</section>
+
+<nav class="pager" aria-label="Verder">
+<a class="caps caps-link" href="../index.html">Terug naar J.OS</a>
+</nav>
+
+</main>
+
+<footer class="foot col">
+<p>Nieuwe toepassingen verschijnen in de nieuwsbrief.</p>
+<p><a class="foot-link" href="https://josloock.nl">Abonneer je gratis op josloock.nl</a></p>
+</footer>
+
+</div>
+<script src="../assets/os.js"></script>
+</body>
+</html>
