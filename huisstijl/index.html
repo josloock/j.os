@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="nl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documenten in je eigen huisstijl · J.OS</title>
+<meta name="description" content="Documenten en presentaties altijd in dezelfde huisstijl, bij elke collega.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F2EEE6">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Documenten in je eigen huisstijl · J.OS">
+<meta property="og:description" content="Documenten en presentaties altijd in dezelfde huisstijl, bij elke collega.">
+<meta property="og:image" content="https://os.josloock.nl/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="../assets/fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<script>try{if(sessionStorage.getItem("jos-arrive")){sessionStorage.removeItem("jos-arrive");document.documentElement.classList.add("arrive")}}catch(e){}</script>
+</head>
+<body>
+<div class="page">
+
+<header class="col">
+<div class="topbar">
+<a class="home-link" href="../index.html" aria-label="J.OS, terug naar het begin"><span class="mark" aria-hidden="true">J.<canvas data-orb="mini"></canvas>S</span></a>
+<p class="caps">Toepassing 2</p>
+</div>
+
+<div class="intro">
+<h1>Documenten in je eigen huisstijl</h1>
+<p class="lede">Documenten en presentaties altijd in dezelfde huisstijl, bij elke collega.</p>
+<p class="more">Leg je huisstijl één keer vast. Daarna maakt je AI elk document en elke presentatie in dezelfde stijl. Je kan daarin zo specifiek zijn als je wil.</p>
+<ul class="meta caps">
+<li>Documenten en presentaties</li>
+<li>Werkt met Claude</li>
+</ul>
+</div>
+</header>
+
+<main class="col">
+
+<!-- Demo: zet hier de video neer zodra die er is.
+<section class="demo" aria-label="Demo">
+<video src="demo.mp4" poster="demo.jpg" controls preload="none"></video>
+</section>
+-->
+
+<section class="section" aria-labelledby="stappen">
+<h2 class="caps caps-wide center" id="stappen">In drie stappen</h2>
+
+<div class="routes" role="tablist" aria-label="Kies waar je huisstijl staat">
+<button class="route" type="button" role="tab" id="tab-ai" aria-controls="route-ai" aria-selected="true">In je eigen AI</button>
+<button class="route" type="button" role="tab" id="tab-online" aria-controls="route-online" aria-selected="false">Openbaar online</button>
+</div>
+
+<div id="route-ai" role="tabpanel" aria-labelledby="tab-ai">
+<p class="route-lede">Voor jezelf. Je huisstijl staat in je eigen Claude en wordt vanzelf gebruikt.</p>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Kopieer de prompt</h3>
+<p>Hiermee legt Claude je huisstijl vast.</p>
+<button class="button" type="button" data-copy="#prompt-ai">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer de prompt</span>
+</button>
+<pre class="prompt" id="prompt-ai" tabindex="0">Je gaat mijn huisstijl vastleggen, zodat je daarna elk document en elke presentatie in dezelfde stijl maakt.
+
+WAT IK MEESTUUR
+Mijn logo, en een voorbeelddocument of het adres van mijn website, als ik die heb. Haal daar zelf zoveel mogelijk uit.
+
+STEL ME DAARNA DEZE VRAGEN
+Stel alleen de vragen waar je het antwoord nog niet op hebt, in één bericht. Ik mag vragen overslaan.
+1. Kleuren: wat zijn mijn hoofdkleur, steunkleuren en achtergrondkleur? Het liefst met kleurcodes.
+2. Lettertypes: welke gebruik ik voor koppen en welke voor lopende tekst, en in welke diktes?
+3. Logo: welke versies zijn er, en waar staat het logo in een document?
+4. Opmaak: waar let ik op bij marges, koppen, tabellen, voettekst en paginanummers?
+5. Toon: hoe schrijf ik? Je of u, kort of uitgebreid, en welke woorden gebruik ik wel of juist nooit?
+6. Presentaties: hoe zien een titeldia en een gewone dia eruit?
+
+MAAK DAARNA
+1. Een huisstijlkaart: één overzicht met alle keuzes, met kleurcodes en lettertypes exact genoteerd. Laat hem aan mij zien en vraag of hij klopt.
+2. Na mijn akkoord een skill met de naam "huisstijl" die ik in Claude kan uploaden. Zet de huisstijlkaart erin, en mijn logo als ik dat heb meegestuurd. Het bestand SKILL.md begint met de naam en een beschrijving. Zet in die beschrijving dat de skill gebruikt wordt bij elk document, elke presentatie en elke afbeelding die ik laat maken, en bij de zin "in mijn huisstijl". Geef me de skill als zip-bestand met de map "huisstijl" erin.
+3. Een proefdocument van één pagina in mijn huisstijl, zodat ik kan zien of het klopt.
+
+Kun je geen bestand maken? Geef me dan de huisstijlkaart als tekst en zeg dat ik hem in de vaste instructies van een project kan zetten.
+
+Verzin geen kleuren of lettertypes. Weet je iets niet, vraag het dan of laat het open en zeg dat erbij.</pre>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Beantwoord de vragen</h3>
+<p>Plak de prompt in Claude. Voeg je logo en een voorbeelddocument toe als je die hebt. Claude stelt daarna een paar vragen en laat je huisstijl zien.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Zet de skill in Claude</h3>
+<p>Je krijgt een bestand terug. Ga in Claude naar Customize, dan Skills. Klik op de plus, kies Create skill en dan Upload a skill, en kies dat bestand. Zeg daarna bij elk document:</p>
+<p class="say">&lsquo;Maak dit in <span class="u">mijn huisstijl.<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
+<p class="hint">Zie je Skills niet? Zet dan bij Settings, Capabilities de optie Code execution and file creation aan.</p>
+</div>
+</li>
+
+</ol>
+</div>
+
+<div id="route-online" role="tabpanel" aria-labelledby="tab-online">
+<p class="route-lede">Voor je team of organisatie. Eén pagina op je website waar iedereen dezelfde huisstijl vandaan haalt, ook elke AI.</p>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Kopieer de prompt</h3>
+<p>Hiermee maakt Claude je huisstijlpagina als één bestand.</p>
+<button class="button" type="button" data-copy="#prompt-online">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer de prompt</span>
+</button>
+<pre class="prompt" id="prompt-online" tabindex="0">Je gaat een huisstijlpagina voor mij maken: één webpagina die ik op mijn website zet, zodat collega's en elke AI daar dezelfde huisstijl vandaan halen.
+
+WAT IK MEESTUUR
+Mijn logo's, en een voorbeelddocument of het adres van mijn website, als ik die heb. Haal daar zelf zoveel mogelijk uit.
+
+STEL ME DAARNA DEZE VRAGEN
+Stel alleen de vragen waar je het antwoord nog niet op hebt, in één bericht. Ik mag vragen overslaan.
+1. Logo's: welke versies zijn er, in welk bestandstype en op welke achtergrond horen ze?
+2. Kleuren: welke kleuren horen bij de huisstijl, met naam en kleurcode?
+3. Lettertypes: welke gebruik ik, in welke diktes, en waarvoor?
+4. Opmaak: zijn er vaste regels voor documenten en presentaties?
+5. Toon: hoe schrijven wij?
+
+MAAK DAARNA
+1. Eén los HTML-bestand met de naam huisstijl.html, zonder losse bestanden eromheen. Bovenaan staan snelle links naar de onderdelen. Daaronder: de logo's met bestandstype en achtergrond, het kleurenpalet met per kleur een vlak, de naam en de kleurcode, en de lettertypes met hun diktes en een voorbeeldzin. Voeg opmaakregels en toon toe als ik die heb gegeven.
+2. Schrijf alles uit als gewone tekst op de pagina, zodat een AI het kan lezen. Kleurcodes en namen van lettertypes staan er dus als tekst, niet alleen in een plaatje.
+3. Maak de pagina zelf in mijn huisstijl.
+4. Zet er niets op wat intern moet blijven. Twijfel je, vraag het me dan.
+
+Geef me het bestand als download en vertel in twee zinnen hoe ik het op mijn website zet.
+
+Verzin geen kleuren of lettertypes. Weet je iets niet, vraag het dan of laat het open en zeg dat erbij.</pre>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Zet de pagina online</h3>
+<p>Zet het bestand op je website, bijvoorbeeld op jouwbedrijf.nl/huisstijl. Vraag het je websitebeheerder als je dat niet zelf doet.</p>
+<p>Zo ziet die van ons eruit: <a href="https://procesbouwers.nl/huisstijl/">procesbouwers.nl/huisstijl</a></p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Verwijs ernaar</h3>
+<p>Geef het adres mee bij elke opdracht:</p>
+<p class="say">&lsquo;Maak dit in de huisstijl van jouwbedrijf.nl/huisstijl.&rsquo;</p>
+<p class="after">Zet deze zin in de vaste instructies van je AI of je team. Dan hoeft niemand hem nog te typen.</p>
+</div>
+</li>
+
+</ol>
+</div>
+</section>
+
+<section class="section" aria-labelledby="weten">
+<h2 class="caps caps-wide center" id="weten">Goed om te weten</h2>
+<ul class="notes">
+<li>Hoe specifieker je huisstijl, hoe beter het resultaat. Kleurcodes en namen van lettertypes helpen het meest.</li>
+<li>Een openbare pagina kan iedereen lezen. Zet er niets op wat intern moet blijven.</li>
+<li>Voor de openbare route moet je AI websites kunnen openen. Zet daarvoor zoeken op het web aan.</li>
+<li>Bekijk het eerste document goed. Klopt er iets niet, zeg het en laat je huisstijl bijwerken.</li>
+</ul>
+<p class="aside">Nieuw hier? <a href="../begin-hier/index.html#spelregels">Lees eerst de spelregels</a>.</p>
+</section>
+
+<nav class="pager" aria-label="Verder">
+<a class="caps caps-link" href="../index.html">Terug naar J.OS</a>
+<a class="caps caps-link" href="../documenten-invullen/index.html">Vorige: documenten invullen</a>
+</nav>
+
+</main>
+
+<footer class="foot col">
+<p>Nieuwe toepassingen verschijnen in de nieuwsbrief.</p>
+<p><a class="foot-link" href="https://josloock.nl">Abonneer je gratis op josloock.nl</a></p>
+</footer>
+
+</div>
+<script src="../assets/os.js"></script>
+</body>
+</html>

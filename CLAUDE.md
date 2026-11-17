@@ -5,11 +5,13 @@ productiviteit. Statische site zonder bouwstap; de map is de site.
 
 ## Opbouw
 
-- `index.html`: homepage met de levende bol en de inhoudsopgave.
+- `index.html`: homepage met de levende bol en daaronder het overzicht met
+  blokken. Elk blok heeft een thema (Werk, Geld besparen, ...).
 - `begin-hier/index.html`: uitleg en spelregels. De bol op de homepage en de
-  eerste regel van de inhoudsopgave openen deze pagina.
-- `documenten-invullen/index.html`: de pagina van een toepassing. Elke
-  toepassing krijgt zo'n eigen map.
+  het eerste blok in het overzicht openen deze pagina.
+- `documenten-invullen/index.html`, `huisstijl/index.html`: de pagina van een
+  toepassing. Elke toepassing krijgt zo'n eigen map. Een toepassing kan twee
+  routes hebben (tabbladen), elk met eigen stappen en een eigen prompt.
 - `assets/site.css`, `assets/os.js`: huisstijl en de bol. Het lettertype staat
   in `assets/fonts` en wordt niet van buiten geladen.
 - `skills/<naam>/`: de bron van een weggeefbare skill.
@@ -22,8 +24,8 @@ productiviteit. Statische site zonder bouwstap; de map is de site.
 
 1. Kopieer de map `documenten-invullen/` en pas de teksten aan. Volgorde van
    een toepassingspagina: introductie, demo, acties, goed om te weten.
-2. Voeg in `index.html` een `<li class="toc-item">` toe aan de lijst
-   "Toepassingen". Met een link in de titel is hij live en krijgt hij een gouden
+2. Voeg in `index.html` een `<li class="toc-item">` toe aan het overzicht
+   "Toepassingen", met het thema linksboven. Met een link in de titel is hij live en krijgt hij een gouden
    punt. Zonder link (en met `class="toc-item soon"`) staat hij op "Binnenkort".
 3. De bol heeft naast het startpunt plek voor zes punten op een breed scherm en
    drie op een telefoon (`WIDE` en `NARROW` in `assets/os.js`). Live

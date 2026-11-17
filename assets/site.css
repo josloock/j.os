@@ -217,22 +217,39 @@ a.node:hover .node-label, a.node.hot .node-label { text-decoration: underline; t
 .lede { margin-top: 24px; max-width: 560px; font-size: 22px; color: var(--body); text-wrap: balance; }
 
 .section { margin-top: 96px; }
-/* de lijst met toepassingen: dezelfde punten als bij de bol */
-.toc { margin-top: 28px; border-top: 1px solid var(--soft); }
-.toc-item { position: relative; display: flex; gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--soft); }
-.toc-title a::after { content: ""; position: absolute; inset: 0; }
-.toc-dot { flex: none; width: 12px; height: 12px; margin: 10px 4px 0; border-radius: 50%; background: var(--oker); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
-.toc-start .toc-dot { box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--oker); }
+/* het overzicht met toepassingen: blokken met dezelfde punten als bij de bol */
+.toc { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.toc-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 208px;
+  padding: 20px 22px 22px;
+  border: 1px solid var(--soft);
+  border-radius: 6px;
+  background: #F8F5EF;
+  transition: border-color .3s ease;
+}
+.toc-item.soon { background: transparent; }
+.toc-start { grid-column: 1 / -1; min-height: 0; }
+/* een blok dat alleen op de laatste rij zou staan, krijgt de hele breedte */
+.toc-item:last-child:nth-child(even) { grid-column: 1 / -1; min-height: 0; }
+.toc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; }
+.toc-theme { display: inline-flex; align-items: center; gap: 10px; }
+.toc-dot { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--oker); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.toc-start .toc-dot { margin: 0 5px; box-shadow: 0 0 0 4px #F8F5EF, 0 0 0 5px var(--oker); }
 .toc-item.soon .toc-dot { background: var(--paper); border: 1.5px solid var(--muted); }
-.toc-body { flex: 1; min-width: 0; }
-.toc-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; }
-.toc-title { font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
-.toc-title a { text-decoration: none; }
 .toc-go { flex: none; color: var(--oker); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
 .toc-go svg { display: block; width: 20px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-.toc-desc { margin-top: 6px; color: var(--body); }
+.toc-body { margin-top: auto; min-width: 0; }
+.toc-title { font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+.toc-title a { text-decoration: none; }
+.toc-title a::after { content: ""; position: absolute; inset: 0; border-radius: 6px; }
+.toc-desc { margin-top: 8px; font-size: 18px; color: var(--body); }
 .toc-item.soon .toc-title, .toc-item.soon .toc-desc { color: var(--muted); }
-.toc-item.hot .toc-dot { transform: scale(1.5); }
+.toc-item.hot:not(.soon) { border-color: var(--oker); }
+.toc-item.hot:not(.soon) .toc-dot { transform: scale(1.4); }
 .toc-item.hot .toc-go { transform: translateX(5px); }
 .toc-item.hot .toc-title a { color: var(--oker-dark); }
 
@@ -268,7 +285,9 @@ a.node:hover .node-label, a.node.hot .node-label { text-decoration: underline; t
   letter-spacing: -.018em;
   color: var(--ink);
 }
+.step .say { overflow-wrap: anywhere; }
 .step .after { margin-top: 24px; }
+.pager a + a { text-align: right; }
 
 .button {
   margin-top: 24px;
@@ -355,6 +374,11 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
   .no-js .stage::before { top: 215px; width: 180px; height: 180px; }
 }
 
+@media (max-width: 640px) {
+  .toc { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .toc-item { min-height: 0; gap: 20px; }
+}
+
 @media (max-width: 360px) {
   .node { max-width: 124px; font-size: 17px; }
 }
@@ -363,9 +387,9 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
   .page { padding-top: 20px; }
   .byline { font-size: 11px; letter-spacing: .14em; }
   .text { font-size: 19px; }
-  .toc-item, .step { gap: 12px; }
+  .step { gap: 12px; }
   .step-num { width: 28px; }
-  .toc-title { font-size: 23px; min-width: 0; overflow-wrap: anywhere; }
+  .toc-title { font-size: 24px; overflow-wrap: anywhere; }
   .step h3 { font-size: 28px; }
   .notes { font-size: 19px; }
   .section { margin-top: 72px; }
