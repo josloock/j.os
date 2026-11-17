@@ -47,7 +47,8 @@
 Kies je bestand
 </label>
 <input class="sr" type="file" id="bestand" accept=".csv,text/csv,text/plain" multiple>
-<p class="mw-drop-note">Je cijfers blijven op je eigen apparaat. Er wordt niets verstuurd.</p>
+<p class="mw-drop-note">Je cijfers blijven op je eigen apparaat. Er wordt niets verstuurd. <a href="#veilig">Zo controleer je dat</a>.</p>
+<p class="mw-offline" id="offline" hidden><span class="toc-dot" aria-hidden="true"></span>Je bent offline. Het werkt gewoon.</p>
 <button class="mw-link" type="button" id="voorbeeld">Bekijk eerst een voorbeeld</button>
 </div>
 <p class="mw-error" id="fout" role="alert" hidden></p>
@@ -164,11 +165,41 @@ Kies je bestand
 
 </div>
 
+<section class="section" id="veilig" aria-labelledby="veilig-kop">
+<h2 class="caps caps-wide center" id="veilig-kop">Zo controleer je het zelf</h2>
+<p class="mw-lead">Je hoeft me niet op mijn woord te geloven. Dit kun je zelf nagaan.</p>
+<ul class="rules mw-proof">
+<li><strong>Kijk eerst met het voorbeeld</strong>Je ziet alles wat de toepassing doet, zonder iets van jezelf te laden.</li>
+<li><strong>Zet je wifi uit</strong>Open deze pagina. Zet daarna je wifi uit of je telefoon in vliegtuigmodus. Sleep dan pas je bestand erin. Het werkt gewoon. Wat geen verbinding heeft, kan niets versturen.
+<p class="mw-offline" id="offline-hier" hidden><span class="toc-dot" aria-hidden="true"></span>Je bent nu offline. Laad je bestand maar.</p></li>
+<li><strong>Je browser houdt het tegen</strong>De pagina heeft zichzelf verboden om verbinding te maken. Probeert de code toch iets te versturen, dan blokkeert je browser dat. Er staan geen cookies en geen meetscripts op deze site.</li>
+<li><strong>Laat je eigen AI de code lezen</strong>De code is openbaar en leesbaar. Kopieer de prompt en vraag Claude of ChatGPT of er iets wordt verstuurd.
+<button class="button" type="button" data-copy="#controle-prompt">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer de prompt</span>
+</button>
+<pre class="prompt" id="controle-prompt" tabindex="0">Ik wil weten of een webpagina mijn bankgegevens ergens naartoe stuurt. De pagina zegt dat alles in mijn eigen browser wordt uitgerekend. Lees de code en controleer dat.
+
+De code staat hier:
+https://github.com/josloock/j.os/tree/main/money-wrapped
+Lees in elk geval index.html, app.js en engine.js in die map, en assets/os.js in de map erboven.
+
+Beantwoord daarna:
+1. Wordt het bestand dat ik laad, of iets wat eruit komt, ergens naartoe verstuurd? Zoek naar fetch, XMLHttpRequest, sendBeacon, WebSocket, formulieren, en naar afbeeldingen of links met gegevens in het adres.
+2. Wat doet de regel Content-Security-Policy bovenaan index.html, en wat houdt die tegen?
+3. Wat wordt er op mijn eigen apparaat bewaard?
+4. Is er iets waar ik op moet letten voordat ik mijn bankafschriften laad?
+
+Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
+<li><strong>Wat er op je apparaat blijft</strong>Alleen wat je zelf naar een andere categorie verplaatst. Je cijfers niet. Sluit je het tabblad, dan zijn ze weg.</li>
+</ul>
+</section>
+
 <section class="section" aria-labelledby="weten">
 <h2 class="caps caps-wide center" id="weten">Goed om te weten</h2>
 <ul class="notes">
 <li>Je bestand wordt op je eigen apparaat gelezen. Er gaat niets naar mij, naar een server of naar een AI.</li>
-<li>De pagina onthoudt je cijfers niet. Sluit je het tabblad, dan zijn ze weg. Alleen wat je zelf verplaatst naar een andere categorie blijft op dit apparaat bewaard.</li>
+<li>Kopieer je de samenvatting voor je AI, dan deel je die met je AI. Dat kies je zelf, en je ziet vooraf wat erin staat.</li>
 <li>De indeling is een schatting. Staat een winkel verkeerd, verplaats hem dan zelf.</li>
 <li>Het werkt nu met een export van ING. Wat je met je creditcard betaalt, staat daar niet in.</li>
 <li>Dit is geen financieel advies. Jij beslist wat je opzegt.</li>

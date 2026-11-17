@@ -480,6 +480,16 @@
   $('maanden').addEventListener('click', function (e) { var el = tipDoel(e); if (el) toonTip(el); });
   window.addEventListener('scroll', function () { tip.hidden = true; }, { passive: true });
 
+  // offline: laat zien dat het dan ook werkt
+  function toonOffline() {
+    var uit = window.navigator.onLine === false;
+    $('offline').hidden = !uit;
+    $('offline-hier').hidden = !uit;
+  }
+  window.addEventListener('online', toonOffline);
+  window.addEventListener('offline', toonOffline);
+  toonOffline();
+
   // het voorbeeld meteen openen: via #voorbeeld in het adres, of als de pagina erom vraagt
   if (window.MW_START_VOORBEELD || window.location.hash === '#voorbeeld') {
     try { st.lijsten = [MW.leesING(window.MW_DEMO.csv())]; st.voorbeeld = true; reken(); $('start').hidden = true; $('uitleg').hidden = true; $('resultaat').hidden = false; teken(true); }
