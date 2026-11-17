@@ -66,8 +66,22 @@ moet de hash in die regel mee veranderen.
 - `demo.js`: het voorbeeld met verzonnen cijfers, in het formaat van ING.
 - `app.js` en `wrapped.css`: wat je ziet.
 
+- `bouw_download.py`: maakt `downloads/money-wrapped.html`, de losse versie die
+  bezoekers opslaan en zonder internet openen. Alles zit in dat ene bestand.
+
+Na elke wijziging in `money-wrapped/` of `assets/` bouw je de download opnieuw,
+anders loopt hij achter op de pagina:
+
+```bash
+python3 money-wrapped/bouw_download.py
+```
+
+Wat tussen `<!-- alleen-site -->` en `<!-- /alleen-site -->` staat, komt niet in
+de download (de tabbladen en de knop naar de download zelf).
+
 Testen: open `money-wrapped/index.html#voorbeeld`, dan staat het voorbeeld
-meteen open. Gebruik nooit echte bankgegevens in tests of in de repo.
+meteen open. Open de download ook een keer als bestand, met de verbinding uit.
+Gebruik nooit echte bankgegevens in tests of in de repo.
 
 Op de homepage staat hij nog op "Binnenkort". Live zetten: geef de titel in
 `index.html` een link naar `money-wrapped/index.html`, haal `soon` weg en zet

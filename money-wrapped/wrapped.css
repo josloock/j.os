@@ -19,11 +19,14 @@
 .mw-drop .button { margin-top: 22px; cursor: pointer; }
 .mw-drop input:focus-visible + .mw-drop-note { outline: 2px solid var(--oker-dark); outline-offset: 6px; }
 .mw-drop-note { margin-top: 20px; max-width: 420px; font-size: 17px; color: var(--muted); }
-.mw-offline { margin-top: 14px; display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px; border: 1px solid var(--oker); border-radius: 999px; font-size: 17px; color: var(--ink); }
+.mw-offline { margin-top: 14px; display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px; border: 1px solid var(--oker); border-radius: 20px; font-size: 17px; color: var(--ink); text-align: left; }
+.mw-offline .toc-dot { width: 10px; height: 10px; }
 .mw-proof { margin: 24px auto 0; max-width: 640px; }
 .mw-proof .button, .mw-proof .mw-offline { display: flex; width: fit-content; max-width: 100%; }
 .mw-proof .button { margin-top: 16px; }
 .mw-proof .prompt { max-height: 220px; font-size: 15px; }
+.mw-drop-alt { margin-top: 6px; }
+.mw-drop-alt .mw-link { margin-top: 0; min-height: 0; padding: 0; font-size: inherit; color: inherit; }
 .mw-link {
   margin-top: 10px;
   min-height: 44px;

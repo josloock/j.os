@@ -482,10 +482,16 @@
 
   // offline: laat zien dat het dan ook werkt
   function toonOffline() {
-    var uit = window.navigator.onLine === false;
-    $('offline').hidden = !uit;
+    var los = window.location.protocol === 'file:', uit = window.navigator.onLine === false;
+    $('offline-tekst').textContent = los ? 'Je werkt vanaf je eigen computer. Internet is niet nodig.' : 'Je bent offline. Het werkt gewoon.';
+    $('offline').hidden = !(los || uit);
     $('offline-hier').hidden = !uit;
   }
+  // de link in het vak opent het tabblad met de download
+  if ($('naar-download')) $('naar-download').addEventListener('click', function () {
+    $('tab-download').click();
+    $('uitleg').scrollIntoView({ block: 'start', behavior: STIL ? 'auto' : 'smooth' });
+  });
   window.addEventListener('online', toonOffline);
   window.addEventListener('offline', toonOffline);
   toonOffline();

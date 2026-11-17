@@ -48,7 +48,10 @@ Kies je bestand
 </label>
 <input class="sr" type="file" id="bestand" accept=".csv,text/csv,text/plain" multiple>
 <p class="mw-drop-note">Je cijfers blijven op je eigen apparaat. Er wordt niets verstuurd. <a href="#veilig">Zo controleer je dat</a>.</p>
-<p class="mw-offline" id="offline" hidden><span class="toc-dot" aria-hidden="true"></span>Je bent offline. Het werkt gewoon.</p>
+<!-- alleen-site -->
+<p class="mw-drop-note mw-drop-alt">Liever los van deze website? <button class="mw-link" type="button" id="naar-download">Gebruik de download</button></p>
+<!-- /alleen-site -->
+<p class="mw-offline" id="offline" hidden><span class="toc-dot" aria-hidden="true"></span><span id="offline-tekst">Je bent offline. Het werkt gewoon.</span></p>
 <button class="mw-link" type="button" id="voorbeeld">Bekijk eerst een voorbeeld</button>
 </div>
 <p class="mw-error" id="fout" role="alert" hidden></p>
@@ -57,6 +60,18 @@ Kies je bestand
 
 <section class="section" id="uitleg" aria-labelledby="stappen">
 <h2 class="caps caps-wide center" id="stappen">In drie stappen</h2>
+
+<!-- alleen-site -->
+<div class="routes" role="tablist" aria-label="Kies waar je het gebruikt">
+<button class="route" type="button" role="tab" id="tab-hier" aria-controls="route-hier" aria-selected="true">Op deze pagina</button>
+<button class="route" type="button" role="tab" id="tab-download" aria-controls="route-download" aria-selected="false">Als download</button>
+</div>
+<!-- /alleen-site -->
+
+<div id="route-hier" role="tabpanel" aria-labelledby="tab-hier">
+<!-- alleen-site -->
+<p class="route-lede">Het snelst. Je bestand wordt hier gelezen, in je eigen browser.</p>
+<!-- /alleen-site -->
 <ol class="steps">
 
 <li class="step">
@@ -87,6 +102,46 @@ Kies je bestand
 </li>
 
 </ol>
+</div>
+
+<!-- alleen-site -->
+<div id="route-download" role="tabpanel" aria-labelledby="tab-download">
+<p class="route-lede">Eén bestand dat op je eigen computer staat. Het werkt zonder internet.</p>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Download Money Wrapped</h3>
+<p>Eén bestand. Je hoeft niets te installeren.</p>
+<a class="button" href="../downloads/money-wrapped.html" download>
+<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v9"/><path d="M5 7.5l4 4 4-4"/><path d="M3 15h12"/></svg>
+Download Money Wrapped
+</a>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Download je afschriften</h3>
+<p>Log in bij Mijn ING op je computer. Open je betaalrekening en kies Downloaden boven je af- en bijschrijvingen. Kies als formaat CSV en neem een lange periode, het liefst vanaf 1 januari vorig jaar.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Open het bestand</h3>
+<p>Zet gerust eerst je wifi uit. Dubbelklik op money-wrapped.html en sleep je afschriften erin.</p>
+<p class="say">&lsquo;Internet is <span class="u">niet nodig.<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
+<p class="hint">Het bestand opent in je browser, maar het staat op je eigen computer. Bovenin zie je geen webadres, maar de plek van het bestand.</p>
+</div>
+</li>
+
+</ol>
+</div>
+<!-- /alleen-site -->
 </section>
 
 <!-- Het resultaat: wordt gevuld door app.js zodra er cijfers zijn. -->
@@ -172,6 +227,9 @@ Kies je bestand
 <li><strong>Kijk eerst met het voorbeeld</strong>Je ziet alles wat de toepassing doet, zonder iets van jezelf te laden.</li>
 <li><strong>Zet je wifi uit</strong>Open deze pagina. Zet daarna je wifi uit of je telefoon in vliegtuigmodus. Sleep dan pas je bestand erin. Het werkt gewoon. Wat geen verbinding heeft, kan niets versturen.
 <p class="mw-offline" id="offline-hier" hidden><span class="toc-dot" aria-hidden="true"></span>Je bent nu offline. Laad je bestand maar.</p></li>
+<!-- alleen-site -->
+<li><strong>Of gebruik de download</strong>Dan staat Money Wrapped als bestand op je eigen computer. Het heeft geen internet nodig en verandert niet meer nadat je het hebt opgeslagen.</li>
+<!-- /alleen-site -->
 <li><strong>Je browser houdt het tegen</strong>De pagina heeft zichzelf verboden om verbinding te maken. Probeert de code toch iets te versturen, dan blokkeert je browser dat. Er staan geen cookies en geen meetscripts op deze site.</li>
 <li><strong>Laat je eigen AI de code lezen</strong>De code is openbaar en leesbaar. Kopieer de prompt en vraag Claude of ChatGPT of er iets wordt verstuurd.
 <button class="button" type="button" data-copy="#controle-prompt">
