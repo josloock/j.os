@@ -23,7 +23,9 @@ productiviteit. Statische site zonder bouwstap; de map is de site.
 ## Een toepassing toevoegen
 
 1. Kopieer de map `documenten-invullen/` en pas de teksten aan. Volgorde van
-   een toepassingspagina: introductie, demo, acties, goed om te weten.
+   een toepassingspagina: introductie, demo, acties, goed om te weten. De
+   introductie is alleen een titel en één duidelijke belofte. Met welke AI het
+   werkt staat niet bovenaan; dat hoort bij "Begin hier".
 2. Voeg in `index.html` een `<li class="toc-item">` toe aan het overzicht
    "Toepassingen", met het thema linksboven. Met een link in de titel is hij live en krijgt hij een gouden
    punt. Zonder link (en met `class="toc-item soon"`) staat hij op "Binnenkort".
