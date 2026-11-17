@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Money Wrapped, de losse versie. Dit bestand staat op je eigen computer en maakt geen verbinding met buiten.
      De bron staat op github.com/josloock/j.os in de map money-wrapped. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Hm3FJEwc2Rhxulan/l3LtSl9d7r3XywYLcRFDSo23Rw=' 'sha256-I3l7xfKYZuqi9WOB7dp7pPx9RFSMZxIAgKlOaUMVHgA=' 'sha256-RItoSpma9I65DNIm6W8ElplmGSn8zvcFE/fG0dyVRFo=' 'sha256-os051XbpnTxwRXmyZCSCwPP+moLdr72/zgltTyev0AM=' 'sha256-j4K9hAqNJ2A/FRVc3/Wq4bxRbULZlngy8dAfuuMHevE=' 'sha256-CJbIz3L0iOS2MJi1JuDAj4h44g4STp1ZhpE84LTtkvk='; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Hm3FJEwc2Rhxulan/l3LtSl9d7r3XywYLcRFDSo23Rw=' 'sha256-I3l7xfKYZuqi9WOB7dp7pPx9RFSMZxIAgKlOaUMVHgA=' 'sha256-hDF32GdsIMWBfA98jUAVpLbM+OER8PEHj4t9Jq9U68E=' 'sha256-os051XbpnTxwRXmyZCSCwPP+moLdr72/zgltTyev0AM=' 'sha256-j4K9hAqNJ2A/FRVc3/Wq4bxRbULZlngy8dAfuuMHevE=' 'sha256-CJbIz3L0iOS2MJi1JuDAj4h44g4STp1ZhpE84LTtkvk='; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Money Wrapped</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
@@ -1752,7 +1752,98 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     ['rente', 'rente']
   ];
 
-  root.MW_REGELS = { cats: CATS, inkomen: INKOMEN, regels: REGELS, volgorde: VOLGORDE, inkomenRegels: INKOMEN_REGELS };
+  /* Waar je opzegt. De naam is de naam uit de regels hierboven.
+     OPZEGGEN: de pagina van de aanbieder waar je opzegt of je abonnement beheert.
+     OPZEG_UITLEG: de pagina van de aanbieder die uitlegt hoe je opzegt.
+     Alleen adressen op de site van de aanbieder zelf. Staat een abonnement er niet
+     bij, dan toont de pagina een zoeklink. Aanbieders verplaatsen hun pagina's:
+     klik de lijst af en toe door.
+     Stand november 2026: gevonden via zoekresultaten op de site van de aanbieder,
+     nog niet één voor één doorgeklikt. Doe dat voordat de toepassing live gaat. */
+  var OPZEGGEN = {
+    // kijken, luisteren, spelen
+    'Netflix': 'https://www.netflix.com/cancelplan',
+    'YouTube Premium': 'https://www.youtube.com/paid_memberships',
+    'YouTube Music': 'https://www.youtube.com/paid_memberships',
+    'Tidal': 'https://account.tidal.com/',
+    'Xbox': 'https://account.microsoft.com/services',
+    // software
+    'Microsoft 365': 'https://account.microsoft.com/services',
+    'Zwift': 'https://www.zwift.com/billing/membership',
+    // kranten en lezen
+    'Het Financieele Dagblad': 'https://fd.nl/contact/cancel',
+    // sport
+    'Basic-Fit': 'https://www.basic-fit.com/nl-nl/opzeggen',
+    'TrainMore': 'https://cancel.trainmore.nl/',
+    // loterijen
+    'Postcode Loterij': 'https://www.postcodeloterij.nl/opzeggen',
+    'Staatsloterij': 'https://staatsloterij.nederlandseloterij.nl/abonnement-opzeggen',
+    'VriendenLoterij': 'https://www.vriendenloterij.nl/over-opzeggen',
+    // lidmaatschappen en goede doelen
+    'ANWB': 'https://www.anwb.nl/lidmaatschap/opzeggen',
+    'Unicef': 'https://www.unicef.nl/contact/lidmaatschap-opzeggen',
+    'Rode Kruis': 'https://www.rodekruis.nl/wie-zijn-wij/contact/donatiebedrag-wijzigen/',
+    'KWF': 'https://www.kwf.nl/doneren/donatie-opzeggen-of-wijzigen',
+    'Hartstichting': 'https://www.hartstichting.nl/over-ons/contact/donateurs/wijzigen-of-stopzetten',
+    'Greenpeace': 'https://www.greenpeace.org/nl/doneren/aanpassen-of-opzeggen/',
+    'Artsen zonder Grenzen': 'https://www.artsenzondergrenzen.nl/contact/gegevens-wijzigen/donatie-opzeggen',
+    'Amnesty': 'https://www.amnesty.nl/steun-ons/opzeggen-lidmaatschap',
+    'Oxfam Novib': 'https://www.oxfamnovib.nl/contact/donatie-opzeggen-of-wijzigen',
+    'Natuurmonumenten': 'https://www.natuurmonumenten.nl/service/lidmaatschap-opzeggen',
+    'Dierenbescherming': 'https://www.dierenbescherming.nl/voor-leden/lidmaatschap-wijzigen-en-opzeggen'
+  };
+  var OPZEG_UITLEG = {
+    // kijken, luisteren, spelen
+    'Disney+': 'https://help.disneyplus.com/nl-NL/article/disneyplus-cancel',
+    'HBO Max': 'https://help.hbomax.com/nl-nl/answer/detail/000002526',
+    'Prime Video': 'https://www.amazon.nl/gp/help/customer/display.html?nodeId=GTJQ7QZY7QL2HK4Y',
+    'Apple TV+': 'https://support.apple.com/nl-nl/118398',
+    'Spotify': 'https://support.spotify.com/nl/article/how-to-cancel-your-subscription/',
+    'Apple Music': 'https://support.apple.com/nl-nl/118399',
+    'Deezer': 'https://support.deezer.com/hc/en-gb/articles/214349245-Cancel-Your-Deezer-Subscription',
+    'Storytel': 'https://support.storytel.com/hc/nl/articles/360010486719',
+    'BookBeat': 'https://support.bookbeat.com/hc/nl/articles/205662511-Hoe-kan-ik-mijn-BookBeat-abonnement-opzeggen',
+    'Kobo Plus': 'https://help.kobo.com/hc/nl/articles/360018976233',
+    'PlayStation': 'https://www.playstation.com/nl-nl/support/store/cancel-ps-store-subscription/',
+    'Nintendo': 'https://www.nintendo.com/nl-nl/Support/Nintendo-Switch/Hoe-je-de-automatische-verlenging-van-Nintendo-Switch-Online-beeindigt-of-de-instellingen-ervan-aanpast-1434298.html',
+    'Patreon': 'https://support.patreon.com/hc/en-us/articles/360005502572-Canceling-a-paid-membership',
+    // software en AI
+    'ChatGPT': 'https://help.openai.com/en/articles/7232927-canceling-your-chatgpt-subscription',
+    'Claude': 'https://support.claude.com/en/articles/8325617-cancel-your-pro-or-max-subscription',
+    'Midjourney': 'https://docs.midjourney.com/hc/en-us/articles/25384024738573-Canceling-Your-Subscription',
+    'Perplexity': 'https://www.perplexity.ai/help-center/en/articles/10354283-canceling-a-subscription',
+    'Google One': 'https://support.google.com/googleone/answer/9056360?hl=nl',
+    'Google Play': 'https://support.google.com/googleplay/answer/7018481?hl=nl',
+    'iCloud': 'https://support.apple.com/nl-nl/108318',
+    'Apple (App Store en iCloud)': 'https://support.apple.com/nl-nl/118428',
+    'Dropbox': 'https://help.dropbox.com/plans/downgrade-dropbox-individual-plans',
+    'Adobe': 'https://helpx.adobe.com/manage-account/using/cancel-subscription.html',
+    'Notion': 'https://www.notion.com/help/upgrade-or-downgrade-your-plan',
+    'Canva': 'https://www.canva.com/help/cancel-canva-plan/',
+    '1Password': 'https://support.1password.com/manage-subscription/',
+    'NordVPN': 'https://support.nordvpn.com/hc/en-us/articles/19556844985489-How-to-cancel-auto-renewal-for-your-NordVPN-subscription',
+    'LinkedIn': 'https://www.linkedin.com/help/linkedin/answer/a545578/cancel-linkedin-premium?lang=nl',
+    'Duolingo': 'https://www.duolingo.com/help/cancel-my-super-duolingo-subscription',
+    'Headspace': 'https://help.headspace.com/hc/en-us/articles/115008364988-How-do-I-cancel-my-subscription',
+    'Calm': 'https://support.calm.com/hc/en-us/articles/115002473607-How-do-I-turn-off-auto-renewal-or-cancel-my-subscription-',
+    'Tinder': 'https://www.help.tinder.com/hc/en-us/articles/115003554466-Cancel-your-subscription',
+    'Strava': 'https://support.strava.com/en-us/articles/15401936-how-do-i-cancel-my-subscription',
+    // kranten, sport, eten, lidmaatschappen
+    'Follow the Money': 'https://help.ftm.nl/en/articles/4251012-i-want-to-cancel-my-subscription-what-should-i-do',
+    'SportCity': 'https://www.sportcity.nl/veel-gestelde-vragen/opzeggen-herroepen',
+    'Fit For Free': 'https://www.sportcity.nl/veel-gestelde-vragen/opzeggen-herroepen',
+    'ClassPass': 'https://help.classpass.com/hc/en-us/articles/204578119-How-do-I-cancel-my-ClassPass-membership',
+    'HelloFresh': 'https://www.hellofresh.nl/about/hoe-annuleer-ik-hellofresh',
+    'Marley Spoon': 'https://support.marleyspoon.com/hc/nl/articles/6616123105935-Hoe-kan-ik-mijn-lidmaatschap-opzeggen',
+    'Swapfiets': 'https://help.swapfiets.com/nl/hoe-kan-ik-mijn-abonnement-opzeggen',
+    'Cineville': 'https://cineville.nl/nl-NL/klantenservice/lidmaatschap/hoe-zeg-ik-mijn-lidmaatschap-op',
+    'WWF': 'https://www.wwf.nl/contact/opzeggen'
+  };
+  var opzeggen = {};
+  Object.keys(OPZEGGEN).forEach(function (naam) { opzeggen[naam] = { url: OPZEGGEN[naam], uitleg: false }; });
+  Object.keys(OPZEG_UITLEG).forEach(function (naam) { opzeggen[naam] = { url: OPZEG_UITLEG[naam], uitleg: true }; });
+
+  root.MW_REGELS = { cats: CATS, inkomen: INKOMEN, regels: REGELS, volgorde: VOLGORDE, inkomenRegels: INKOMEN_REGELS, opzeggen: opzeggen };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>/* Money Wrapped: de rekenkern. Leest een export van de bank, herkent winkels,
