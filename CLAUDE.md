@@ -22,12 +22,14 @@ productiviteit. Statische site zonder bouwstap; de map is de site.
 
 1. Kopieer de map `documenten-invullen/` en pas de teksten aan. Volgorde van
    een toepassingspagina: introductie, demo, acties, goed om te weten.
-2. Voeg in `index.html` een `<li class="toc-item">` toe. Met een link in de
-   titel is hij live en wordt hij vanzelf een gouden punt bij de bol. Zonder
-   link (en met `class="toc-item soon"`) staat hij op "Binnenkort".
-3. De bol heeft plek voor vier punten op een breed scherm en drie op een
-   telefoon (`WIDE` en `NARROW` in `assets/os.js`). Komen er meer, breid die
-   lijsten dan uit en controleer dat labels de bol niet raken.
+2. Voeg in `index.html` een `<li class="toc-item">` toe aan de lijst
+   "Toepassingen". Met een link in de titel is hij live en krijgt hij een gouden
+   punt. Zonder link (en met `class="toc-item soon"`) staat hij op "Binnenkort".
+3. De bol heeft naast het startpunt plek voor zes punten op een breed scherm en
+   drie op een telefoon (`WIDE` en `NARROW` in `assets/os.js`). Live
+   toepassingen krijgen als eerste een plek; wat niet past staat alleen in de
+   lijst. Verander je de plekken, controleer dan dat labels de bol en elkaar
+   niet raken.
 
 ## Een skill bijwerken
 
@@ -45,7 +47,7 @@ daarop voordat hij live gaat.
 ## Huisstijl
 
 - Papier `#F2EEE6`, inkt `#1C1712`, espresso `#1F1A14`. Eén goud accent: de
-  getekende onderstreping (`#C9A23A`) en oker (`#A57820`) voor cijfers en sterren.
+  getekende onderstreping (`#C9A23A`) en oker (`#A57820`) voor cijfers en punten.
 - Alleen Newsreader, rechtop.
 - Geen gedachtestreepjes in teksten. Korte zinnen.
 - Jos schrijft zijn teksten zelf. Neem zijn woorden letterlijk over en stel een

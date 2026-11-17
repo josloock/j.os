@@ -107,7 +107,7 @@ ol, ul { padding: 0; list-style: none; }
 .byline a { display: inline-block; padding: 14px 0; margin: -14px 0; text-decoration: none; }
 .byline a:hover { text-decoration: underline; }
 
-.stage { position: relative; width: 100%; height: 540px; margin-top: 4px; }
+.stage { position: relative; width: 100%; height: 560px; margin-top: 4px; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 /* zonder JavaScript: een stille, gestippelde bol */
 .no-js .stage::before {
@@ -173,7 +173,7 @@ a.node:hover .node-dot::after { animation: ping 1.3s ease-out infinite; }
 a.node:hover { color: var(--ink); }
 a.node:hover, .node.hot { --hot: 1.5; }
 a.node:hover .node-label, a.node.hot .node-label { text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 5px; }
-.node-soon { color: var(--muted); }
+.node-soon { color: var(--muted); font-size: 18px; max-width: 170px; }
 .node-soon .node-dot { width: 12px; height: 12px; background: var(--paper); border: 1.5px solid var(--muted); }
 .node-soon .node-dot::after { display: none; }
 .node-note { font-size: 11px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
@@ -217,21 +217,23 @@ a.node:hover .node-label, a.node.hot .node-label { text-decoration: underline; t
 .lede { margin-top: 24px; max-width: 560px; font-size: 22px; color: var(--body); text-wrap: balance; }
 
 .section { margin-top: 96px; }
-.toc { margin-top: 28px; border-top: 1px solid var(--line); }
-.toc-item { position: relative; display: flex; gap: 20px; padding: 30px 0; border-bottom: 1px solid var(--soft); }
+/* de lijst met toepassingen: dezelfde punten als bij de bol */
+.toc { margin-top: 28px; border-top: 1px solid var(--soft); }
+.toc-item { position: relative; display: flex; gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--soft); }
 .toc-title a::after { content: ""; position: absolute; inset: 0; }
-.toc-num { flex: none; width: 36px; padding-top: 5px; font-size: 30px; line-height: 1.15; color: var(--oker); }
+.toc-dot { flex: none; width: 12px; height: 12px; margin: 10px 4px 0; border-radius: 50%; background: var(--oker); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.toc-start .toc-dot { box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--oker); }
+.toc-item.soon .toc-dot { background: var(--paper); border: 1.5px solid var(--muted); }
 .toc-body { flex: 1; min-width: 0; }
-.toc-head { display: flex; align-items: baseline; gap: 14px; }
-.toc-title { font-size: 30px; font-weight: 400; line-height: 1.15; letter-spacing: -.01em; }
-.toc-title a { display: inline-block; padding: 5px 0; text-decoration: none; }
-.toc-title span { display: inline-block; padding: 5px 0; }
-.toc-leader { flex: 1; min-width: 24px; border-bottom: 2px dotted var(--leader); }
-.toc-desc { margin-top: 10px; color: var(--body); }
-.toc-item.soon .toc-title, .toc-item.soon .toc-num { color: var(--muted); }
-.toc-dot { display: inline-block; width: 12px; height: 12px; margin: 10px 0 0 3px; border-radius: 50%; background: var(--oker); }
-.toc-leader { transition: border-color .3s ease; }
-.toc-item.hot .toc-leader { border-bottom-color: var(--gold); }
+.toc-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; }
+.toc-title { font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+.toc-title a { text-decoration: none; }
+.toc-go { flex: none; color: var(--oker); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.toc-go svg { display: block; width: 20px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.toc-desc { margin-top: 6px; color: var(--body); }
+.toc-item.soon .toc-title, .toc-item.soon .toc-desc { color: var(--muted); }
+.toc-item.hot .toc-dot { transform: scale(1.5); }
+.toc-item.hot .toc-go { transform: translateX(5px); }
 .toc-item.hot .toc-title a { color: var(--oker-dark); }
 
 /* ---------- toepassingspagina ---------- */
@@ -353,16 +355,17 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
   .no-js .stage::before { top: 215px; width: 180px; height: 180px; }
 }
 
+@media (max-width: 360px) {
+  .node { max-width: 124px; font-size: 17px; }
+}
+
 @media (max-width: 560px) {
   .page { padding-top: 20px; }
   .byline { font-size: 11px; letter-spacing: .14em; }
   .text { font-size: 19px; }
   .toc-item, .step { gap: 12px; }
-  .toc-num, .step-num { width: 28px; }
-  .toc-title { font-size: 26px; }
-  .toc-leader { display: none; }
-  .toc-head { justify-content: space-between; flex-wrap: wrap; row-gap: 0; }
-  .toc-title { min-width: 0; overflow-wrap: anywhere; }
+  .step-num { width: 28px; }
+  .toc-title { font-size: 23px; min-width: 0; overflow-wrap: anywhere; }
   .step h3 { font-size: 28px; }
   .notes { font-size: 19px; }
   .section { margin-top: 72px; }

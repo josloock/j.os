@@ -11,7 +11,7 @@
   var TAU = 6.2832;
   // plek van elk punt ten opzichte van het midden van de bol, in bolstralen
   var START_WIDE = [0, -1.52], START_NARROW = [0, -1.7];
-  var WIDE = [[-1.86, -0.42], [1.82, -0.04], [-1.34, 0.98], [1.44, 1.02]];
+  var WIDE = [[-1.9, -0.3], [1.88, -0.14], [-1.34, 1.0], [1.44, 1.04], [1.42, -1.14], [-1.42, -1.14]];
   var NARROW = [[-1.05, 1.62], [1.05, 1.62], [0, 2.75]];
 
   // een nieuwe pagina opent altijd bovenaan (terug en vooruit houden hun plek)
@@ -337,7 +337,6 @@
       core.addEventListener('pointerleave', function () { coreHot = false; });
     }
 
-    var apps = 0;
     var items = Array.prototype.slice.call(document.querySelectorAll('.toc-item'));
     var nodes = items.map(function (li, index) {
       var link = li.querySelector('.toc-title a'), start = li.classList.contains('toc-start');
@@ -349,7 +348,7 @@
       el.innerHTML = '<span class="node-dot"></span><span class="node-text"><span class="node-label">' + esc(title) + '</span>' +
         (link ? '' : '<span class="node-note">Binnenkort</span>') + '</span>';
       stage.appendChild(el);
-      var node = { el: el, li: li, live: !!link, start: start, slot: start ? -1 : apps++, x: 0, y: 0, shown: false,
+      var node = { el: el, li: li, live: !!link, start: start, slot: -1, x: 0, y: 0, shown: false,
         p1: Math.random() * TAU, p2: Math.random() * TAU, p3: Math.random() * TAU, sparks: [], next: 2.5 + Math.random() * 3 };
       function on() { hot = index; el.classList.add('hot'); li.classList.add('hot'); }
       function off() { if (hot === index) hot = -1; el.classList.remove('hot'); li.classList.remove('hot'); }
@@ -366,6 +365,11 @@
       }
       return node;
     });
+
+    // de plekken bij de bol gaan eerst naar wat live is; de rest staat alleen in de lijst
+    nodes.filter(function (nd) { return !nd.start; })
+      .sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); })
+      .forEach(function (nd, i) { nd.slot = i; });
 
     // het wezen draait een klein beetje mee met de muis
     var aimX = 0, aimY = 0, lookX = 0, lookY = 0, att = 0, ax = 0, ay = 0, az = 1;
@@ -389,7 +393,7 @@
       var ctx = f.ctx, w = f.w, h = f.h;
       var wide = w >= 680;
       var R = wide ? Math.min(w * 0.19, h * 0.27) : Math.min(w * 0.25, 92);
-      var cx = w / 2, cy = wide ? h * 0.53 : 215;
+      var cx = w / 2, cy = wide ? h * 0.52 : 215;
       var born = easeOut(t / 1.2); // het wezen vormt zich bij het laden
       lookX += (aimX - lookX) * 0.05; lookY += (aimY - lookY) * 0.05;
 
@@ -429,11 +433,13 @@
         var up = off[1] < 0; // punt boven de bol: label erboven, zodat de draad vrij blijft
         // elk punt zwaait traag om de bol, als aan een draad
         var baseA = Math.atan2(off[1], off[0]), baseD = Math.sqrt(off[0] * off[0] + off[1] * off[1]) * R;
-        var ang = baseA + (STILL ? 0 : 0.085 * Math.sin(t * 0.23 + nd.p1) + 0.03 * Math.sin(t * 0.61 + nd.p2));
+        // op een smal scherm hangt het onderste punt altijd onder de labels van de twee erboven
+        if (!wide && nd.slot === 2) baseD = Math.max(baseD, 1.62 * R + 118);
+        var ang = baseA + (STILL ? 0 : 0.07 * Math.sin(t * 0.23 + nd.p1) + 0.025 * Math.sin(t * 0.61 + nd.p2));
         var dist = baseD * (1 + (STILL ? 0 : 0.035 + 0.035 * Math.sin(t * 0.31 + nd.p3)));
         var tx = cx + Math.cos(ang) * dist, ty = cy + Math.sin(ang) * dist;
         // geboorte: het punt reist zichtbaar van het hart naar zijn plek
-        var out = STILL ? 1 : easeInOut((t - 1.0 - k * 0.5) / 1.7);
+        var out = STILL ? 1 : easeInOut((t - 1.0 - (nd.slot + 1) * 0.36) / 1.7);
         // op een smal scherm blijft het label altijd binnen beeld
         if (!wide) { var half = nd.el.offsetWidth / 2; tx = clamp(tx, half - 12, w - half + 12); }
         var nx = cx + (tx - cx) * out, ny = cy + (ty - cy) * out;
