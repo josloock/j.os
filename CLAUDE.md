@@ -14,6 +14,8 @@ productiviteit. Statische site zonder bouwstap; de map is de site.
   routes hebben (tabbladen), elk met eigen stappen en een eigen prompt.
 - `assets/site.css`, `assets/os.js`: huisstijl en de bol. Het lettertype staat
   in `assets/fonts` en wordt niet van buiten geladen.
+- `money-wrapped/`: een toepassing die in de browser rekent in plaats van in een
+  AI. Zie "Money Wrapped" hieronder.
 - `skills/<naam>/`: de bron van een weggeefbare skill.
 - `downloads/<naam>.zip`: wat bezoekers downloaden. Gemaakt uit `skills/`.
 - `CNAME`, `.nojekyll`, `robots.txt`: voor GitHub Pages. De site staat op
@@ -47,6 +49,29 @@ In een weggeefbare skill staan nooit persoonsgegevens, een handtekening of een
 paraaf. `profiel.md` is leeg (maak hem met
 `scripts/maak_persoonlijke_skill.py --leeg profiel.md`). Controleer de zip
 daarop voordat hij live gaat.
+
+## Money Wrapped
+
+Je sleept een export van ING in de pagina en krijgt je jaar in beelden, een
+overzicht en advies. Alles wordt in de browser uitgerekend. Er gaat niets naar
+een server of een AI. Dat is de belofte van deze toepassing: voeg dus nooit iets
+toe dat gegevens verstuurt. De pagina dwingt dit af met een Content-Security-
+Policy (`connect-src 'none'`). Verander je het kleine script in de `<head>`, dan
+moet de hash in die regel mee veranderen.
+
+- `regels.js`: categorieën en de namen van winkels en abonnementen. Hier voeg je
+  een winkel toe. Bovenaan staat hoe een regel werkt.
+- `engine.js`: leest het bestand, herkent vaste lasten en maakt het advies. Geen
+  schermcode, dus te testen met `node`.
+- `demo.js`: het voorbeeld met verzonnen cijfers, in het formaat van ING.
+- `app.js` en `wrapped.css`: wat je ziet.
+
+Testen: open `money-wrapped/index.html#voorbeeld`, dan staat het voorbeeld
+meteen open. Gebruik nooit echte bankgegevens in tests of in de repo.
+
+Op de homepage staat hij nog op "Binnenkort". Live zetten: geef de titel in
+`index.html` een link naar `money-wrapped/index.html`, haal `soon` weg en zet
+hem in de pager van de andere toepassingen.
 
 ## Huisstijl
 

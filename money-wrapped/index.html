@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="nl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Deze pagina mag geen verbinding maken met buiten. Zo kunnen je cijfers je apparaat niet verlaten. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Hm3FJEwc2Rhxulan/l3LtSl9d7r3XywYLcRFDSo23Rw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+<title>Money Wrapped · J.OS</title>
+<meta name="description" content="Je jaar in een overzicht, met adviezen waar veel geld heengaat en wat je kan opzeggen.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F2EEE6">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Money Wrapped · J.OS">
+<meta property="og:description" content="Je jaar in een overzicht, met adviezen waar veel geld heengaat en wat je kan opzeggen.">
+<meta property="og:image" content="https://os.josloock.nl/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="../assets/fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="wrapped.css">
+<script>try{if(sessionStorage.getItem("jos-arrive")){sessionStorage.removeItem("jos-arrive");document.documentElement.classList.add("arrive")}}catch(e){}</script>
+</head>
+<body>
+<div class="page">
+
+<header class="col">
+<div class="topbar">
+<a class="home-link" href="../index.html" aria-label="J.OS, terug naar het begin"><span class="mark" aria-hidden="true">J.<canvas data-orb="mini"></canvas>S</span></a>
+<p class="caps">Toepassing 3</p>
+</div>
+
+<div class="intro">
+<h1>Money Wrapped</h1>
+<p class="lede">Je jaar in een overzicht, met adviezen waar veel geld heengaat en wat je kan opzeggen.</p>
+</div>
+</header>
+
+<main class="col">
+
+<!-- Begin: hier laad je je bestand. Verdwijnt zodra er cijfers zijn. -->
+<section class="mw-start" id="start" aria-label="Laad je bestand">
+<div class="mw-drop" id="drop">
+<p class="mw-drop-title">Sleep je bestand van ING hierheen</p>
+<label class="button" for="bestand">
+<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 12V3"/><path d="M5 6.5l4-4 4 4"/><path d="M3 15h12"/></svg>
+Kies je bestand
+</label>
+<input class="sr" type="file" id="bestand" accept=".csv,text/csv,text/plain" multiple>
+<p class="mw-drop-note">Je cijfers blijven op je eigen apparaat. Er wordt niets verstuurd.</p>
+<button class="mw-link" type="button" id="voorbeeld">Bekijk eerst een voorbeeld</button>
+</div>
+<p class="mw-error" id="fout" role="alert" hidden></p>
+<noscript><p class="mw-error">Deze toepassing rekent in je browser. Zet daarvoor JavaScript aan.</p></noscript>
+</section>
+
+<section class="section" id="uitleg" aria-labelledby="stappen">
+<h2 class="caps caps-wide center" id="stappen">In drie stappen</h2>
+<ol class="steps">
+
+<li class="step">
+<span class="step-num" aria-hidden="true">1</span>
+<div class="step-body">
+<h3>Download je afschriften</h3>
+<p>Log in bij Mijn ING op je computer. Open je betaalrekening en kies Downloaden boven je af- en bijschrijvingen. Kies als formaat CSV.</p>
+<p>Neem een lange periode, het liefst vanaf 1 januari vorig jaar. Dan vindt het ook je jaarabonnementen en ziet het wat duurder is geworden.</p>
+<p class="hint">Zie je Downloaden niet? Zoek dan bij Service naar Af- en bijschrijvingen downloaden. De namen van deze knoppen veranderen weleens.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">2</span>
+<div class="step-body">
+<h3>Sleep het bestand hierheen</h3>
+<p>Naar het vak bovenaan deze pagina. Heb je meer rekeningen, sleep ze er dan allemaal tegelijk in. Wat je tussen je eigen rekeningen overboekt, telt niet mee.</p>
+</div>
+</li>
+
+<li class="step">
+<span class="step-num" aria-hidden="true">3</span>
+<div class="step-body">
+<h3>Bekijk je jaar</h3>
+<p>Eerst je jaar in een paar beelden. Daarna het hele overzicht, je vaste lasten en wat je kunt opzeggen.</p>
+<p class="say">&lsquo;Waar ging mijn <span class="u">geld heen?<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
+</div>
+</li>
+
+</ol>
+</section>
+
+<!-- Het resultaat: wordt gevuld door app.js zodra er cijfers zijn. -->
+<div id="resultaat" hidden>
+
+<div class="mw-bar" id="balk"></div>
+
+<section class="mw-story" id="verhaal" aria-label="Je jaar in beelden" aria-roledescription="carrousel">
+<div class="mw-phone" id="telefoon" tabindex="0">
+<div class="mw-progress" id="voortgang" aria-hidden="true"></div>
+<div class="mw-slides" id="dias" aria-live="polite"></div>
+<button class="mw-tap mw-tap-prev" type="button" id="tik-terug" tabindex="-1" aria-hidden="true"></button>
+<button class="mw-tap mw-tap-next" type="button" id="tik-verder" tabindex="-1" aria-hidden="true"></button>
+<div class="mw-nav">
+<button class="mw-nav-btn" type="button" id="terug">Terug</button>
+<button class="mw-nav-btn mw-nav-next" type="button" id="verder">Verder</button>
+</div>
+</div>
+<p class="mw-skip"><a href="#kort">Sla over, naar het overzicht</a></p>
+</section>
+
+<section class="section" id="kort" aria-labelledby="kort-kop">
+<h2 class="caps caps-wide center" id="kort-kop">In het kort</h2>
+<div class="mw-tiles" id="tegels"></div>
+</section>
+
+<section class="section" aria-labelledby="maand-kop">
+<h2 class="caps caps-wide center" id="maand-kop">Per maand</h2>
+<p class="mw-lead" id="maand-tekst"></p>
+<div class="mw-chart" id="maanden"></div>
+</section>
+
+<section class="section" aria-labelledby="cat-kop">
+<h2 class="caps caps-wide center" id="cat-kop">Waar het heen ging</h2>
+<p class="mw-lead">Klik op een regel voor de winkels erachter. Staat er iets verkeerd, verplaats het dan.</p>
+<div class="mw-cats" id="categorieen"></div>
+</section>
+
+<section class="section" id="vast" aria-labelledby="vast-kop">
+<h2 class="caps caps-wide center" id="vast-kop">Vaste lasten en abonnementen</h2>
+<p class="mw-lead" id="vast-tekst"></p>
+<div id="opzegbaar"></div>
+<div class="mw-total" id="opzeg-totaal">
+<p class="mw-total-text" id="opzeg-tekst" aria-live="polite"></p>
+<button class="button" type="button" data-copy="#opzeg-prompt">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer mijn opzeglijst</span>
+</button>
+<p class="hint">Plak hem in Claude of ChatGPT. Je krijgt per abonnement hoe je opzegt en een brief die je kunt versturen.</p>
+<pre class="prompt" id="opzeg-prompt" tabindex="0"></pre>
+</div>
+<div id="vaste-lasten"></div>
+</section>
+
+<section class="section" id="advies" aria-labelledby="advies-kop">
+<h2 class="caps caps-wide center" id="advies-kop">Advies</h2>
+<ol class="mw-advice" id="adviezen"></ol>
+</section>
+
+<section class="section" aria-labelledby="groot-kop">
+<h2 class="caps caps-wide center" id="groot-kop">Grootste losse uitgaven</h2>
+<ul class="mw-list" id="grootste"></ul>
+</section>
+
+<section class="section" aria-labelledby="ai-kop">
+<h2 class="caps caps-wide center" id="ai-kop">Laat je AI meedenken</h2>
+<div class="mw-ai">
+<p>Wil je verder dan deze pagina? Kopieer een samenvatting met een prompt erbij en plak hem in je AI. Er staan geen namen van personen en geen rekeningnummers in. Je ziet hieronder precies wat je kopieert.</p>
+<button class="button" type="button" data-copy="#ai-prompt">
+<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
+<span>Kopieer samenvatting en prompt</span>
+</button>
+<pre class="prompt" id="ai-prompt" tabindex="0"></pre>
+</div>
+</section>
+
+</div>
+
+<section class="section" aria-labelledby="weten">
+<h2 class="caps caps-wide center" id="weten">Goed om te weten</h2>
+<ul class="notes">
+<li>Je bestand wordt op je eigen apparaat gelezen. Er gaat niets naar mij, naar een server of naar een AI.</li>
+<li>De pagina onthoudt je cijfers niet. Sluit je het tabblad, dan zijn ze weg. Alleen wat je zelf verplaatst naar een andere categorie blijft op dit apparaat bewaard.</li>
+<li>De indeling is een schatting. Staat een winkel verkeerd, verplaats hem dan zelf.</li>
+<li>Het werkt nu met een export van ING. Wat je met je creditcard betaalt, staat daar niet in.</li>
+<li>Dit is geen financieel advies. Jij beslist wat je opzegt.</li>
+</ul>
+<p class="aside">Nieuw hier? <a href="../begin-hier/index.html#spelregels">Lees eerst de spelregels</a>.</p>
+</section>
+
+<nav class="pager" aria-label="Verder">
+<a class="caps caps-link" href="../index.html">Terug naar J.OS</a>
+</nav>
+
+</main>
+
+<footer class="foot col">
+<p>Nieuwe toepassingen verschijnen in de nieuwsbrief.</p>
+<p><a class="foot-link" href="https://josloock.nl">Abonneer je gratis op josloock.nl</a></p>
+</footer>
+
+</div>
+<div class="mw-tip" id="tip" role="tooltip" hidden></div>
+<script src="../assets/os.js"></script>
+<script src="regels.js"></script>
+<script src="engine.js"></script>
+<script src="demo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

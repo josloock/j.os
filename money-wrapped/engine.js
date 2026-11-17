@@ -1,0 +1,730 @@
+/* Money Wrapped: de rekenkern. Leest een export van de bank, herkent winkels,
+   categorieën en vaste lasten, en maakt het overzicht en het advies.
+   Alles gebeurt hier, in de browser. Er wordt niets verstuurd. */
+(function (root) {
+  'use strict';
+
+  var R = root.MW_REGELS;
+  var MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+  var MAANDEN_KORT = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  var WEEKDAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+
+  /* ---------- hulpjes ---------- */
+
+  function norm(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function dagVan(j, m, d) { return Math.round(Date.UTC(j, m - 1, d) / 864e5); }
+  function datumVan(dag) { return new Date(dag * 864e5); }
+  function mediaan(a) {
+    if (!a.length) return 0;
+    var s = a.slice().sort(function (x, y) { return x - y; }), h = s.length >> 1;
+    return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+  }
+  function som(a, f) { var t = 0; for (var i = 0; i < a.length; i++) t += f ? f(a[i]) : a[i]; return t; }
+  function rond(x) { return Math.round(x * 100) / 100; }
+
+  var EURO0 = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  var EURO2 = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
+  function euro(x, centen) {
+    var s = (centen || (Math.abs(x) < 100 && Math.round(x) !== x && centen !== false)) ? EURO2.format(x) : EURO0.format(x);
+    return s;
+  }
+  function getal(x) { return new Intl.NumberFormat('nl-NL').format(x); }
+  function datum(dag, metJaar) {
+    var d = datumVan(dag);
+    return d.getUTCDate() + ' ' + MAANDEN[d.getUTCMonth()] + (metJaar ? ' ' + d.getUTCFullYear() : '');
+  }
+  function maandJaar(dag) { var d = datumVan(dag); return MAANDEN[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+  function meervoud(n, een, meer) { return n + ' ' + (n === 1 ? een : meer); }
+
+  /* ---------- regels klaarzetten ---------- */
+
+  var MERK = [], ALGEMEEN = [];
+  R.volgorde.forEach(function (cat) {
+    (R.regels[cat] || []).forEach(function (regel) {
+      var i = regel.indexOf('='), label = regel.slice(0, i), rest = regel.slice(i + 1), vlag = {};
+      var j = rest.lastIndexOf('!');
+      if (j > -1) { rest.slice(j + 1).split(',').forEach(function (f) { vlag[f] = 1; }); rest = rest.slice(0, j); }
+      var soort = Object.keys(vlag).filter(function (f) { return f !== 'abo' && f !== 'n' && f !== 'vast'; })[0] || '';
+      var r = {
+        re: new RegExp('\\b(?:' + rest + ')\\b'), label: label, cat: cat, soort: soort, alleenNaam: !!vlag.n,
+        abo: !vlag.vast && (!!vlag.abo || (!!R.cats[cat].abo && !!label))
+      };
+      (label ? MERK : ALGEMEEN).push(r);
+    });
+  });
+  var INKOMEN_RE = R.inkomenRegels.map(function (r) { return [r[0], new RegExp('\\b(?:' + r[1] + ')\\b')]; });
+
+  // betaaldiensten die voor de echte naam staan
+  var VOORVOEGSEL = /^(?:ccv|sumup|zettle|iz|sq|bck|pay nl|mollie|adyen|paypal|tmc|ems|payco|msp|ppro|stripe|bs|lsp|wpy|twint)\s+(?=\S)/;
+  var BEDRIJF = /\b(?:b v|bv|n v|nv|vof|v o f|stichting|holding|gmbh|ltd|inc|vereniging|praktijk|bedrijf|service|services|shop|store|winkel|groep|group|nederland|international|beheer|advies|consultancy|studio|company|sarl|llc|limited|plc|maatschap|firma|bank|online|com|nl)\b/;
+
+  var cache = {};
+  function zoekRegel(tekst, inMemo) {
+    var k = (inMemo ? 'm|' : 'n|') + tekst;
+    if (k in cache) return cache[k];
+    var gevonden = null, i;
+    for (i = 0; i < MERK.length && !gevonden; i++) if (!(inMemo && MERK[i].alleenNaam) && MERK[i].re.test(tekst)) gevonden = MERK[i];
+    for (i = 0; i < ALGEMEEN.length && !gevonden; i++) if (ALGEMEEN[i].re.test(tekst)) gevonden = ALGEMEEN[i];
+    return (cache[k] = gevonden);
+  }
+
+  var VELD_EINDE = '(?=\\s+(?:Naam|Omschrijving|IBAN|Kenmerk|Machtiging ID|Incassant ID|Valutadatum|Datum/Tijd|Pasvolgnr|Transactie|Term|Name|Description|Reference|Mandate ID|Creditor ID|Value date):|\\s+(?:Doorlopende|Eenmalige) incasso|\\s+(?:Recurrent|One-off) SEPA|$)';
+  var VELD_NAAM = new RegExp('(?:Naam|Name):\\s*(.*?)' + VELD_EINDE);
+  var VELD_OMS = new RegExp('(?:Omschrijving|Description):\\s*(.*?)' + VELD_EINDE);
+
+  function netteNaam(ruw) {
+    var s = (ruw || '').replace(/\s+/g, ' ').trim();
+    s = s.replace(/^(?:CCV|SUMUP|ZETTLE_|IZ|SQ|BCK|PAY\.NL|MOLLIE|ADYEN|PAYPAL|TMC|EMS|PAYCO|MSP|PPRO|STRIPE|BS|LSP|WPY)\s*\*\s*/i, '');
+    s = s.replace(/\s+(?:NLD|NL|BEL|DEU|GBR|IRL|LUX|USA|FRA|ESP|ITA|SWE|DNK|PRT|AUT|CHE)$/i, '');
+    s = s.replace(/\b\d{3,}\b/g, ' ').replace(/\s+(?:b\.?v\.?|n\.?v\.?)(?=\s|$)/ig, ' ').replace(/[*_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (s && s === s.toUpperCase()) {
+      s = s.toLowerCase().replace(/(^|[\s\-'&.\/])([a-zà-ÿ])/g, function (m, a, b) { return a + b.toUpperCase(); });
+    } else {
+      s = s.replace(/\b[A-Z]{4,}\b/g, function (w) { return w.charAt(0) + w.slice(1).toLowerCase(); });
+    }
+    return s || 'Onbekend';
+  }
+
+  /* ---------- het bestand lezen ---------- */
+
+  function leesCSV(tekst) {
+    tekst = tekst.replace(/^﻿/, '');
+    var eerste = tekst.slice(0, tekst.indexOf('\n') > -1 ? tekst.indexOf('\n') : tekst.length);
+    var scheiding = (eerste.split(';').length >= eerste.split(',').length) ? ';' : ',';
+    var rijen = [], rij = [], veld = '', inQ = false, i = 0, n = tekst.length, c;
+    while (i < n) {
+      c = tekst[i];
+      if (inQ) {
+        if (c === '"') { if (tekst[i + 1] === '"') { veld += '"'; i++; } else inQ = false; }
+        else veld += c;
+      } else if (c === '"') inQ = true;
+      else if (c === scheiding) { rij.push(veld); veld = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && tekst[i + 1] === '\n') i++;
+        rij.push(veld); veld = '';
+        if (rij.length > 1 || rij[0] !== '') rijen.push(rij);
+        rij = [];
+      } else veld += c;
+      i++;
+    }
+    if (veld !== '' || rij.length) { rij.push(veld); rijen.push(rij); }
+    return rijen;
+  }
+
+  var KOLOMMEN = {
+    datum: ['datum', 'date'],
+    naam: ['naam / omschrijving', 'naam/omschrijving', 'name / description'],
+    rekening: ['rekening', 'account'],
+    tegen: ['tegenrekening', 'counterparty'],
+    code: ['code'],
+    afbij: ['af bij', 'af/bij', 'debit/credit'],
+    bedrag: ['bedrag (eur)', 'amount (eur)', 'bedrag'],
+    soort: ['mutatiesoort', 'transaction type'],
+    memo: ['mededelingen', 'notifications'],
+    saldo: ['saldo na mutatie', 'resulting balance']
+  };
+
+  function leesBedrag(s) {
+    s = (s || '').trim().replace(/\s|€/g, '');
+    if (s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.');
+    var x = parseFloat(s);
+    return isFinite(x) ? x : NaN;
+  }
+  function leesDatum(s) {
+    s = (s || '').trim();
+    var m;
+    if ((m = /^(\d{4})(\d{2})(\d{2})$/.exec(s))) return [+m[1], +m[2], +m[3]];
+    if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s))) return [+m[1], +m[2], +m[3]];
+    if ((m = /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/.exec(s))) return [+m[3], +m[2], +m[1]];
+    return null;
+  }
+
+  // één ING-bestand naar een lijst af- en bijschrijvingen
+  function leesING(tekst) {
+    var rijen = leesCSV(tekst);
+    if (rijen.length < 2) throw new Error('Dit bestand is leeg.');
+    var kop = rijen[0].map(function (k) { return k.trim().toLowerCase(); }), col = {};
+    Object.keys(KOLOMMEN).forEach(function (k) {
+      col[k] = -1;
+      KOLOMMEN[k].forEach(function (naam) { if (col[k] < 0) col[k] = kop.indexOf(naam); });
+    });
+    if (col.datum < 0 || col.naam < 0 || col.afbij < 0 || col.bedrag < 0) {
+      throw new Error('Dit lijkt geen export van ING. Kies bij het downloaden voor het formaat CSV.');
+    }
+    var uit = [];
+    for (var i = 1; i < rijen.length; i++) {
+      var r = rijen[i], d = leesDatum(r[col.datum]), b = leesBedrag(r[col.bedrag]);
+      if (!d || isNaN(b)) continue;
+      var richting = (r[col.afbij] || '').trim().toLowerCase();
+      uit.push({
+        dag: dagVan(d[0], d[1], d[2]), jaar: d[0], maand: d[1],
+        naam: (r[col.naam] || '').trim(),
+        rekening: col.rekening > -1 ? (r[col.rekening] || '').replace(/\s/g, '') : '',
+        tegen: col.tegen > -1 ? (r[col.tegen] || '').replace(/\s/g, '') : '',
+        code: col.code > -1 ? (r[col.code] || '').trim().toUpperCase() : '',
+        af: richting === 'af' || richting === 'debit',
+        bedrag: Math.abs(b),
+        soort: col.soort > -1 ? (r[col.soort] || '').trim() : '',
+        memo: col.memo > -1 ? (r[col.memo] || '').replace(/\s+/g, ' ').trim() : ''
+      });
+    }
+    if (!uit.length) throw new Error('Ik vind geen af- en bijschrijvingen in dit bestand.');
+    return uit;
+  }
+
+  // meerdere bestanden samenvoegen; wat in twee bestanden staat telt één keer
+  function voegSamen(lijsten) {
+    var max = {}, alles = [];
+    lijsten.forEach(function (lijst) {
+      var tel = {};
+      lijst.forEach(function (t) {
+        var k = [t.dag, t.rekening, t.af ? 'a' : 'b', t.bedrag, t.naam, t.memo].join('|');
+        tel[k] = (tel[k] || 0) + 1;
+        if (tel[k] > (max[k] || 0)) { max[k] = tel[k]; alles.push(t); }
+      });
+    });
+    alles.sort(function (a, b) { return a.dag - b.dag; });
+    return alles;
+  }
+
+  /* ---------- herkennen: winkel, categorie, soort geldstroom ---------- */
+
+  function herken(txs, eigenRegels) {
+    eigenRegels = eigenRegels || {};
+    var eigen = {};
+    txs.forEach(function (t) { if (t.rekening) eigen[t.rekening] = 1; });
+
+    txs.forEach(function (t) {
+      var nNaam = norm(t.naam).replace(VOORVOEGSEL, '');
+      var mNaam = VELD_NAAM.exec(t.memo), mOms = VELD_OMS.exec(t.memo);
+      var oms = mOms ? norm(mOms[1]) : (t.code === 'BA' || t.code === 'GM' ? '' : norm(t.memo));
+      var regel = zoekRegel(nNaam, false) || (mNaam && zoekRegel(norm(mNaam[1]).replace(VOORVOEGSEL, ''), false)) || (oms && zoekRegel(oms, true)) || null;
+
+      t.winkel = regel && regel.label ? regel.label : netteNaam(t.naam);
+      t.sleutel = regel && regel.label ? 'r:' + regel.label.toLowerCase() : 'n:' + norm(t.winkel);
+      t.regel = regel;
+      t.incasso = t.code === 'IC' || /incasso/i.test(t.soort);
+      t.doorlopend = /doorlopende incasso|recurrent sepa/i.test(t.memo);
+
+      var tikkie = /\btikkie\b|betaalverzoek/.test(nNaam + ' ' + oms);
+      var overboeking = /^(?:GT|OV|IDB|VZ)$/.test(t.code) || /online bankieren|overschrijving/i.test(t.soort);
+      var persoon = tikkie || (overboeking && !BEDRIJF.test(nNaam));
+      var cat, stroom;
+
+      if (t.tegen && eigen[t.tegen]) { cat = 'eigen'; stroom = 'intern'; }
+      else if (t.af) {
+        cat = regel ? regel.cat : (t.code === 'GM' || /geldautomaat/i.test(t.soort)) ? 'contant' : persoon ? 'personen' : 'overig';
+        stroom = 'uit';
+      } else {
+        var ink = null;
+        for (var i = 0; i < INKOMEN_RE.length && !ink; i++) if (INKOMEN_RE[i][1].test(nNaam + ' ' + oms)) ink = INKOMEN_RE[i][0];
+        if (regel && R.cats[regel.cat].buiten) { cat = regel.cat; stroom = 'uit'; }
+        else if (ink) { cat = ink; stroom = 'in'; }
+        else if (regel) { cat = regel.cat; stroom = 'terug'; }
+        else if (persoon) { cat = 'terugbetaald'; stroom = 'in'; }
+        else { cat = 'inkomen_overig'; stroom = 'in'; }
+      }
+
+      // wat je zelf hebt verplaatst, wint
+      var eigenCat = eigenRegels[t.sleutel];
+      if (eigenCat && R.cats[eigenCat] && stroom !== 'intern' && stroom !== 'in') { cat = eigenCat; t.verplaatst = true; }
+      else if (eigenCat && R.cats[eigenCat] && R.cats[eigenCat].buiten && stroom === 'in') { cat = eigenCat; t.verplaatst = true; }
+
+      if (R.cats[cat] && R.cats[cat].buiten) stroom = cat === 'eigen' ? 'intern' : 'sparen';
+      else if (stroom === 'sparen' || (stroom === 'intern' && cat !== 'eigen')) stroom = t.af ? 'uit' : 'terug';
+      t.cat = cat;
+      t.stroom = stroom;
+    });
+    return txs;
+  }
+
+  /* ---------- vaste lasten en abonnementen vinden ---------- */
+
+  var RITMES = [
+    { id: 'week', dagen: 7, marge: 1.5, perJaar: 52, label: 'per week' },
+    { id: 'tweeweken', dagen: 14, marge: 2.5, perJaar: 26, label: 'per twee weken' },
+    { id: 'vierweken', dagen: 28, marge: 1.6, perJaar: 13, label: 'per vier weken' },
+    { id: 'maand', dagen: 30.44, marge: 4.6, perJaar: 12, label: 'per maand' },
+    { id: 'tweemaanden', dagen: 60.9, marge: 8, perJaar: 6, label: 'per twee maanden' },
+    { id: 'kwartaal', dagen: 91.3, marge: 11, perJaar: 4, label: 'per kwartaal' },
+    { id: 'halfjaar', dagen: 182.6, marge: 16, perJaar: 2, label: 'per halfjaar' },
+    { id: 'jaar', dagen: 365.25, marge: 26, perJaar: 1, label: 'per jaar' }
+  ];
+  var JAAR = RITMES[7];
+
+  function vindRitme(lijst) {
+    if (lijst.length < 2) return null;
+    var tussen = [];
+    for (var i = 1; i < lijst.length; i++) tussen.push(lijst[i].dag - lijst[i - 1].dag);
+    var med = mediaan(tussen), beste = null;
+    RITMES.forEach(function (r) {
+      var d = Math.abs(med - r.dagen);
+      if (d <= r.marge && (!beste || d < Math.abs(med - beste.dagen))) beste = r;
+    });
+    if (!beste) return null;
+    var goed = tussen.filter(function (t) {
+      return Math.abs(t - beste.dagen) <= beste.marge || Math.abs(t - 2 * beste.dagen) <= beste.marge * 1.5;
+    }).length;
+    return goed / tussen.length >= 0.7 ? beste : null;
+  }
+
+  function isStabiel(lijst) {
+    var bedragen = lijst.map(function (t) { return t.bedrag; }), med = mediaan(bedragen), uniek = {};
+    bedragen.forEach(function (b) { uniek[b.toFixed(2)] = 1; });
+    if (Object.keys(uniek).length <= Math.max(2, Math.floor(lijst.length / 5))) return true;
+    return bedragen.filter(function (b) { return Math.abs(b - med) <= med * 0.12; }).length / bedragen.length >= 0.75;
+  }
+
+  function keurReeks(lijst, eind) {
+    if (lijst.length < 2) return null;
+    var ritme = vindRitme(lijst);
+    if (!ritme) return null;
+    var stabiel = isStabiel(lijst);
+    var incasso = lijst.filter(function (t) { return t.incasso; }).length / lijst.length >= 0.7;
+    var abo = !!(lijst[0].regel && lijst[0].regel.abo);
+    if (lijst.length >= 3) {
+      if (!(stabiel || incasso || abo)) return null;
+    } else {
+      var a = lijst[0].bedrag, b = lijst[1].bedrag, lijkt = Math.abs(a - b) <= Math.max(a, b) * 0.3;
+      var nieuw = eind - lijst[1].dag <= ritme.dagen * 1.5 + 6;
+      if (!((ritme.id === 'jaar' && lijkt && (incasso || abo)) || ((incasso || abo) && lijkt && nieuw && ritme.dagen >= 28))) return null;
+    }
+    return { ritme: ritme, stabiel: stabiel };
+  }
+
+  function vindVasteLasten(txs) {
+    var eind = txs.length ? txs[txs.length - 1].dag : 0, groepen = {}, reeksen = [];
+    txs.forEach(function (t) {
+      if (t.stroom !== 'uit' || R.cats[t.cat].geenAbo && !(t.regel && t.regel.abo)) return;
+      (groepen[t.sleutel] = groepen[t.sleutel] || []).push(t);
+    });
+
+    function voegToe(lijst, keur, extra) {
+      reeksen.push({
+        sleutel: lijst[0].sleutel + (extra ? '|' + extra : ''), winkelSleutel: lijst[0].sleutel,
+        naam: lijst[0].winkel, cat: lijst[0].cat, soort: lijst[0].regel ? lijst[0].regel.soort : '',
+        abo: !!(lijst[0].regel && lijst[0].regel.abo), ritme: keur.ritme, stabiel: keur.stabiel, txs: lijst,
+        onzeker: !!keur.onzeker
+      });
+    }
+
+    Object.keys(groepen).forEach(function (k) {
+      var lijst = groepen[k];
+      // per exact bedrag: zo vallen twee abonnementen bij dezelfde partij uit elkaar
+      var perBedrag = {}, delen = [];
+      lijst.forEach(function (t) { (perBedrag[t.bedrag.toFixed(2)] = perBedrag[t.bedrag.toFixed(2)] || []).push(t); });
+      Object.keys(perBedrag).forEach(function (b) {
+        if (perBedrag[b].length < 3) return;
+        var keur = keurReeks(perBedrag[b], eind);
+        if (keur) delen.push({ lijst: perBedrag[b], keur: keur });
+      });
+      var tegelijk = false;
+      for (var i = 0; i < delen.length; i++) for (var j = i + 1; j < delen.length; j++) {
+        var a = delen[i].lijst, b = delen[j].lijst;
+        var overlap = Math.min(a[a.length - 1].dag, b[b.length - 1].dag) - Math.max(a[0].dag, b[0].dag);
+        if (overlap > delen[i].keur.ritme.dagen * 1.5) tegelijk = true;
+      }
+      var heel = tegelijk ? null : keurReeks(lijst, eind);
+      if (heel) voegToe(lijst, heel);
+      else if (delen.length) delen.forEach(function (d) { voegToe(d.lijst, d.keur, delen.length > 1 ? d.lijst[0].bedrag.toFixed(2) : ''); });
+      else {
+        // één keer gezien, wel een doorlopende incasso of een bekend abonnement: waarschijnlijk per jaar
+        var kandidaten = lijst.filter(function (t) { return t.doorlopend || (t.regel && t.regel.abo); });
+        if (lijst.length === 1 && kandidaten.length === 1 && eind - lijst[0].dag >= 45 && lijst[0].bedrag >= 5) {
+          voegToe(lijst, { ritme: JAAR, stabiel: true, onzeker: true });
+        }
+      }
+    });
+    return reeksen;
+  }
+
+  // de stand van een reeks op een bepaalde dag
+  function standVan(reeks, peil) {
+    var txs = reeks.txs.filter(function (t) { return t.dag <= peil; });
+    if (!txs.length) return null;
+    var r = reeks.ritme, laatste = txs[txs.length - 1], eerste = txs[0];
+    var recent = txs.slice(-3).map(function (t) { return t.bedrag; });
+    var nu = reeks.stabiel ? laatste.bedrag : mediaan(recent);
+    var venster = txs.filter(function (t) { return t.dag > peil - 365; });
+    var perJaar;
+    if (reeks.stabiel) perJaar = nu * r.perJaar;
+    else if (eerste.dag <= peil - 365 + r.dagen && venster.length) perJaar = som(venster, function (t) { return t.bedrag; });
+    else perJaar = (venster.length ? som(venster, function (t) { return t.bedrag; }) / venster.length : nu) * r.perJaar;
+
+    var grens = Math.min(r.dagen * 1.35 + 10, r.dagen + 45);
+    var loopt = peil - laatste.dag <= grens;
+
+    // duurder geworden: vergelijk met ongeveer een jaar eerder
+    var toen = txs.filter(function (t) { return t.dag <= laatste.dag - 300 && t.dag >= laatste.dag - 430; }).map(function (t) { return t.bedrag; });
+    if (!toen.length && laatste.dag - eerste.dag >= 150) toen = txs.slice(0, reeks.stabiel ? 1 : 3).map(function (t) { return t.bedrag; });
+    var was = toen.length ? mediaan(toen) : 0, stijging = null;
+    if (was > 0 && nu > was * (reeks.stabiel ? 1.02 : 1.1) && nu - was >= 0.5) {
+      stijging = { van: was, naar: nu, procent: Math.round((nu / was - 1) * 100), perJaar: (nu - was) * r.perJaar };
+    }
+    var cat = R.cats[reeks.cat] || {};
+    return {
+      sleutel: reeks.sleutel, winkelSleutel: reeks.winkelSleutel, naam: reeks.naam, cat: reeks.cat, soort: reeks.soort,
+      ritme: r, bedrag: rond(nu), perJaar: rond(perJaar), perMaand: rond(perJaar / 12),
+      eerste: eerste.dag, laatste: laatste.dag, aantal: txs.length, loopt: loopt, onzeker: reeks.onzeker,
+      volgende: laatste.dag + Math.round(r.dagen), stijging: stijging, stabiel: reeks.stabiel,
+      type: reeks.abo ? 'opzegbaar' : (cat.type || 'vast')
+    };
+  }
+
+  /* ---------- alles bij elkaar ---------- */
+
+  function maakData(lijsten, eigenRegels) {
+    var txs = herken(voegSamen(lijsten), eigenRegels);
+    if (!txs.length) throw new Error('Ik vind geen af- en bijschrijvingen.');
+    return { txs: txs, begin: txs[0].dag, eind: txs[txs.length - 1].dag, reeksen: vindVasteLasten(txs) };
+  }
+
+  function periodes(data) {
+    var lijst = [], j1 = datumVan(data.begin).getUTCFullYear(), j2 = datumVan(data.eind).getUTCFullYear();
+    for (var j = j2; j >= j1; j--) {
+      var van = Math.max(dagVan(j, 1, 1), data.begin), tot = Math.min(dagVan(j, 12, 31), data.eind);
+      if (tot - van + 1 >= 28) lijst.push({ id: String(j), label: String(j), van: van, tot: tot, jaar: j });
+    }
+    if (data.eind - data.begin > 400 || !lijst.length) {
+      lijst.push({ id: '12m', label: 'Laatste 12 maanden', van: Math.max(data.begin, data.eind - 364), tot: data.eind });
+    }
+    if (lijst.length > 1 && data.eind - data.begin > 400) lijst.push({ id: 'alles', label: 'Alles', van: data.begin, tot: data.eind });
+    var kies = lijst[0];
+    if (kies.jaar && kies.tot - kies.van < 150) {
+      kies = lijst.filter(function (p) { return p.id === '12m'; })[0] || lijst[0];
+    }
+    lijst.forEach(function (p) { p.dagen = p.tot - p.van + 1; p.maanden = p.dagen / 30.44; p.standaard = p === kies; });
+    return lijst;
+  }
+
+  function analyseer(data, periode) {
+    var P = periode, txs = data.txs.filter(function (t) { return t.dag >= P.van && t.dag <= P.tot; });
+    var uit = 0, binnen = 0, sparen = 0, cats = {}, inkomen = {}, winkels = {}, maanden = {}, perDag = {}, weekdag = [0, 0, 0, 0, 0, 0, 0];
+
+    function maandSleutel(t) { return t.jaar + '-' + (t.maand < 10 ? '0' : '') + t.maand; }
+    // alle maanden in de periode, ook lege
+    (function () {
+      var d = datumVan(P.van), j = d.getUTCFullYear(), m = d.getUTCMonth() + 1, e = datumVan(P.tot);
+      while (j < e.getUTCFullYear() || (j === e.getUTCFullYear() && m <= e.getUTCMonth() + 1)) {
+        var van = Math.max(P.van, dagVan(j, m, 1)), tot = Math.min(P.tot, dagVan(j, m + 1, 1) - 1);
+        maanden[j + '-' + (m < 10 ? '0' : '') + m] = {
+          sleutel: j + '-' + (m < 10 ? '0' : '') + m, jaar: j, maand: m, naam: MAANDEN[m - 1], kort: MAANDEN_KORT[m - 1],
+          uit: 0, binnen: 0, heel: tot - van + 1 >= dagVan(j, m + 1, 1) - dagVan(j, m, 1) - 1
+        };
+        if (++m > 12) { m = 1; j++; }
+      }
+    })();
+
+    txs.forEach(function (t) {
+      var m = maanden[maandSleutel(t)];
+      if (t.stroom === 'uit' || t.stroom === 'terug') {
+        var teken = t.stroom === 'uit' ? 1 : -1, b = t.bedrag * teken;
+        uit += b;
+        var c = cats[t.cat] = cats[t.cat] || { id: t.cat, label: R.cats[t.cat].label, totaal: 0, aantal: 0, winkels: {} };
+        c.totaal += b; if (teken > 0) c.aantal++;
+        var w = winkels[t.sleutel] = winkels[t.sleutel] || { sleutel: t.sleutel, naam: t.winkel, cat: t.cat, totaal: 0, aantal: 0, verplaatst: !!t.verplaatst };
+        w.totaal += b; if (teken > 0) w.aantal++;
+        c.winkels[t.sleutel] = w;
+        if (m) m.uit += b;
+
+      } else if (t.stroom === 'in') {
+        binnen += t.bedrag;
+        var ic = inkomen[t.cat] = inkomen[t.cat] || { id: t.cat, label: R.inkomen[t.cat].label, totaal: 0, aantal: 0 };
+        ic.totaal += t.bedrag; ic.aantal++;
+        if (m) m.binnen += t.bedrag;
+      } else if (t.stroom === 'sparen') {
+        sparen += t.af ? t.bedrag : -t.bedrag;
+      }
+    });
+
+    var catLijst = Object.keys(cats).map(function (k) {
+      var c = cats[k];
+      c.winkels = Object.keys(c.winkels).map(function (s) { return c.winkels[s]; }).sort(function (a, b) { return b.totaal - a.totaal; });
+      c.aandeel = uit > 0 ? c.totaal / uit : 0;
+      return c;
+    }).filter(function (c) { return c.totaal > 0.005 || c.aantal; }).sort(function (a, b) { return b.totaal - a.totaal; });
+    var winkelLijst = Object.keys(winkels).map(function (k) { return winkels[k]; });
+    var maandLijst = Object.keys(maanden).sort().map(function (k) { return maanden[k]; });
+
+    // vaste lasten: stand aan het einde van de periode
+    var peil = P.tot, vast = [], gestopt = [];
+    data.reeksen.forEach(function (r) {
+      var s = standVan(r, peil);
+      if (!s) return;
+      s.inPeriode = som(r.txs.filter(function (t) { return t.dag >= P.van && t.dag <= P.tot; }), function (t) { return t.bedrag; });
+      if (s.loopt) vast.push(s);
+      else if (s.laatste >= P.van && !s.onzeker) gestopt.push(s);
+    });
+    vast.sort(function (a, b) { return b.perJaar - a.perJaar; });
+    gestopt.sort(function (a, b) { return b.perJaar - a.perJaar; });
+    var vasteSleutels = {};
+    vast.concat(gestopt).forEach(function (s) { vasteSleutels[s.winkelSleutel] = 1; });
+
+    var vastPerJaar = som(vast, function (s) { return s.perJaar; });
+    var opzegbaar = vast.filter(function (s) { return s.type === 'opzegbaar'; });
+
+    // waar je het vaakst kwam: winkels waar je zelf afrekent, geen vaste lasten
+    var bezoek = winkelLijst.filter(function (w) {
+      return !vasteSleutels[w.sleutel] && w.aantal >= 2 && !/^(?:personen|overig|contant|creditcard|belasting|wonen|lenen|bank)$/.test(w.cat);
+    }).sort(function (a, b) { return b.aantal - a.aantal || b.totaal - a.totaal; });
+
+    var duursteDag = null;
+    txs.forEach(function (t) {
+      if (t.stroom !== 'uit' || vasteSleutels[t.sleutel]) return;
+      perDag[t.dag] = (perDag[t.dag] || 0) + t.bedrag;
+      weekdag[datumVan(t.dag).getUTCDay()] += t.bedrag;
+    });
+    Object.keys(perDag).forEach(function (d) { if (!duursteDag || perDag[d] > duursteDag.totaal) duursteDag = { dag: +d, totaal: perDag[d] }; });
+    var grootste = txs.filter(function (t) { return t.stroom === 'uit' && !vasteSleutels[t.sleutel]; }).sort(function (a, b) { return b.bedrag - a.bedrag; }).slice(0, 6);
+    var heleMaanden = maandLijst.filter(function (m) { return m.heel; });
+    var duursteMaand = (heleMaanden.length ? heleMaanden : maandLijst).slice().sort(function (a, b) { return b.uit - a.uit; })[0];
+    var rustigsteMaand = (heleMaanden.length ? heleMaanden : maandLijst).slice().sort(function (a, b) { return a.uit - b.uit; })[0];
+    var besteWeekdag = weekdag.indexOf(Math.max.apply(null, weekdag));
+
+    // mogelijk twee keer afgeschreven
+    var dubbelTel = {}, dubbel = [];
+    txs.forEach(function (t) {
+      if (t.stroom !== 'uit' || t.bedrag < 5 || !(t.incasso || (t.regel && t.regel.abo))) return;
+      var k = t.sleutel + '|' + t.dag + '|' + t.bedrag.toFixed(2);
+      dubbelTel[k] = (dubbelTel[k] || 0) + 1;
+      if (dubbelTel[k] === 2) dubbel.push(t);
+    });
+
+    var res = {
+      periode: P, aantal: txs.length, uit: uit, binnen: binnen, sparen: sparen, over: binnen - uit,
+      perDag: uit / P.dagen, perMaand: uit / P.maanden,
+      cats: catLijst, inkomen: Object.keys(inkomen).map(function (k) { return inkomen[k]; }).sort(function (a, b) { return b.totaal - a.totaal; }),
+      winkels: winkelLijst.sort(function (a, b) { return b.totaal - a.totaal; }), bezoek: bezoek,
+      maanden: maandLijst, duursteMaand: duursteMaand, rustigsteMaand: rustigsteMaand, duursteDag: duursteDag,
+      besteWeekdag: WEEKDAGEN[besteWeekdag], grootste: grootste,
+      vast: vast, gestopt: gestopt, vastPerJaar: vastPerJaar, vastPerMaand: vastPerJaar / 12,
+      opzegbaar: opzegbaar, opzegbaarPerJaar: som(opzegbaar, function (s) { return s.perJaar; }),
+      dubbel: dubbel, eind: data.eind, begin: data.begin
+    };
+    res.cat = function (id) { return cats[id] || { id: id, label: R.cats[id].label, totaal: 0, aantal: 0, winkels: [], aandeel: 0 }; };
+    res.advies = maakAdvies(res);
+    res.type = geldtype(res);
+    return res;
+  }
+
+  /* ---------- het advies ---------- */
+
+  var SOORTEN = {
+    video: ['streamingdiensten', 'Kijk je ze echt allemaal tegelijk? Houd er één aan en wissel per maand. Je zegt ze per maand op en bent zo weer terug.'],
+    muziek: ['muziekdiensten', 'Eén is genoeg. Je muziek en je lijsten neem je mee.'],
+    opslag: ['diensten voor opslag', 'Kies één plek voor je foto’s en bestanden.'],
+    ai: ['AI-abonnementen', 'Kies er één voor dagelijks werk. Een tweede neem je alleen de maand dat je hem nodig hebt.'],
+    nieuws: ['abonnementen op nieuws', 'Lees je ze allemaal? Kranten geven vaak korting als je wilt opzeggen.'],
+    boeken: ['abonnementen op boeken', 'Luister of lees je bij allebei?'],
+    sportschool: ['sportabonnementen', 'Naar welke ga je echt?']
+  };
+
+  function opsomming(lijst) {
+    if (lijst.length <= 1) return lijst.join('');
+    return lijst.slice(0, -1).join(', ') + ' en ' + lijst[lijst.length - 1];
+  }
+
+  function maakAdvies(r) {
+    var adv = [], P = r.periode, gebruikt = {};
+    var maandNu = datumVan(r.eind).getUTCMonth() + 1;
+
+    // dubbele abonnementen
+    Object.keys(SOORTEN).forEach(function (soort) {
+      var lijst = r.vast.filter(function (s) { return s.soort === soort; });
+      if (lijst.length < 2) return;
+      var totaal = som(lijst, function (s) { return s.perJaar; }), duurste = Math.max.apply(null, lijst.map(function (s) { return s.perJaar; }));
+      lijst.forEach(function (s) { gebruikt[s.sleutel] = 1; });
+      adv.push({
+        id: 'dubbel-' + soort, soort: 'actie', bespaar: totaal - duurste, sleutels: lijst.map(function (s) { return s.sleutel; }),
+        titel: 'Je betaalt voor ' + lijst.length + ' ' + SOORTEN[soort][0],
+        tekst: opsomming(lijst.map(function (s) { return s.naam; })) + '. Samen ' + euro(totaal, false) + ' per jaar. ' + SOORTEN[soort][1]
+      });
+    });
+
+    // jaarabonnementen die binnenkort verlengen
+    var straks = r.vast.filter(function (s) { return s.ritme.id === 'jaar' && s.type !== 'vast' && s.volgende >= r.eind - 7 && s.volgende <= r.eind + 100; });
+    if (straks.length) {
+      adv.push({
+        id: 'verlenging', soort: 'actie', bespaar: 0, sleutels: straks.map(function (s) { return s.sleutel; }),
+        titel: straks.length === 1 ? 'Dit jaarabonnement wordt binnenkort verlengd' : 'Deze jaarabonnementen worden binnenkort verlengd',
+        tekst: opsomming(straks.map(function (s) { return s.naam + ' rond ' + datum(s.volgende) + ' (' + euro(s.bedrag, false) + ')'; })) +
+          '. Wil je ervan af? Zeg dan nu op. Na de verlenging zit je vaak weer een jaar vast.'
+      });
+    }
+
+    // duurder geworden
+    var duurder = r.vast.filter(function (s) { return s.stijging && s.stijging.perJaar >= 6 && s.type !== 'vast'; }).sort(function (a, b) { return b.stijging.perJaar - a.stijging.perJaar; });
+    if (duurder.length) {
+      adv.push({
+        id: 'duurder', soort: 'check', bespaar: 0, sleutels: duurder.map(function (s) { return s.sleutel; }),
+        titel: (duurder.length === 1 ? duurder[0].naam + ' is' : duurder.length + ' vaste lasten zijn') + ' duurder geworden',
+        tekst: duurder.slice(0, 5).map(function (s) {
+          return s.naam + ' ging van ' + euro(s.stijging.van) + ' naar ' + euro(s.stijging.naar) + ' ' + s.ritme.label;
+        }).join('. ') + '. Samen ' + euro(som(duurder, function (s) { return s.stijging.perJaar; }), false) + ' per jaar meer. Is het je dat nog waard?'
+      });
+    }
+
+    // klein en vergeten
+    var klein = r.opzegbaar.filter(function (s) { return s.perMaand <= 10 && !gebruikt[s.sleutel]; });
+    if (klein.length >= 2) {
+      adv.push({
+        id: 'klein', soort: 'check', bespaar: 0, sleutels: klein.map(function (s) { return s.sleutel; }),
+        titel: klein.length + ' kleine abonnementen onder de tien euro',
+        tekst: opsomming(klein.slice(0, 8).map(function (s) { return s.naam; })) + '. Samen ' + euro(som(klein, function (s) { return s.perJaar; }), false) +
+          ' per jaar. Kleine bedragen vallen niet op. Weet je bij elk nog waarvoor het is?'
+      });
+    }
+
+    // loterijen
+    var lot = r.cat('loterij');
+    if (lot.totaal >= 60) {
+      adv.push({
+        id: 'loterij', soort: 'check', bespaar: 0, sleutels: r.vast.filter(function (s) { return s.cat === 'loterij'; }).map(function (s) { return s.sleutel; }),
+        titel: euro(lot.totaal / P.maanden * 12, false) + ' per jaar aan loterijen',
+        tekst: opsomming(lot.winkels.slice(0, 4).map(function (w) { return w.naam; })) + '. Heb je weleens uitgerekend wat je ervoor terugkreeg?'
+      });
+    }
+
+    // bezorgen
+    var bez = r.cat('bezorgen');
+    if (bez.aantal >= 6) {
+      var gem = bez.totaal / bez.aantal;
+      adv.push({
+        id: 'bezorgen', soort: 'actie', bespaar: gem * 12, sleutels: [],
+        titel: bez.aantal + ' keer eten laten bezorgen',
+        tekst: 'Samen ' + euro(bez.totaal, false) + ', gemiddeld ' + euro(gem, false) + ' per keer. Eén keer per maand minder scheelt ' + euro(gem * 12, false) + ' per jaar.'
+      });
+    }
+
+    // energie
+    var energie = r.vast.filter(function (s) { return s.cat === 'energie' && s.perMaand >= 40; });
+    if (energie.length) {
+      adv.push({
+        id: 'energie', soort: 'check', bespaar: 0, sleutels: energie.map(function (s) { return s.sleutel; }),
+        titel: 'Vergelijk je energie één keer per jaar',
+        tekst: 'Je betaalt ' + euro(som(energie, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(energie.map(function (s) { return s.naam; })) +
+          '. Wie blijft zitten, betaalt meestal meer dan wie overstapt. Kijk wanneer je contract afloopt en vergelijk dan.'
+      });
+    }
+
+    // verzekeringen
+    var verz = r.vast.filter(function (s) { return s.cat === 'verzekeringen'; });
+    if (verz.length) {
+      var zorg = verz.filter(function (s) { return s.soort === 'zorg'; });
+      var tekst = 'Je betaalt ' + euro(som(verz, function (s) { return s.perJaar; }), false) + ' per jaar aan ' + opsomming(verz.map(function (s) { return s.naam; })) + '. ';
+      tekst += verz.length >= 2 ? 'Kijk of je iets dubbel hebt verzekerd. Reis, rechtsbijstand en aansprakelijkheid zitten vaak ook in een pakket.' : 'Kijk één keer per jaar of de dekking nog bij je past.';
+      if (zorg.length && maandNu >= 11) tekst += ' Je zorgverzekering kun je tot en met 31 december opzeggen. De nieuwe premies staan nu online.';
+      else if (zorg.length) tekst += ' Je zorgverzekering kun je elk jaar in november en december vergelijken.';
+      adv.push({ id: 'verzekeringen', soort: 'check', bespaar: 0, sleutels: verz.map(function (s) { return s.sleutel; }), titel: verz.length >= 2 ? 'Loop je ' + verz.length + ' verzekeringen na' : 'Loop je verzekering na', tekst: tekst });
+    }
+
+    // telefoon en internet
+    var tel = r.vast.filter(function (s) { return s.cat === 'telecom'; });
+    if (tel.length) {
+      adv.push({
+        id: 'telecom', soort: 'check', bespaar: 0, sleutels: tel.map(function (s) { return s.sleutel; }),
+        titel: 'Loopt je contract voor telefoon of internet nog?',
+        tekst: 'Je betaalt ' + euro(som(tel, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(tel.map(function (s) { return s.naam; })) +
+          '. Is je contract afgelopen, dan betaal je vaak nog voor een toestel dat al van jou is. Sim only of opnieuw onderhandelen is dan goedkoper.'
+      });
+    }
+
+    // twee keer afgeschreven
+    if (r.dubbel.length) {
+      adv.push({
+        id: 'tweekeer', soort: 'check', bespaar: 0, sleutels: [],
+        titel: 'Mogelijk twee keer afgeschreven',
+        tekst: r.dubbel.slice(0, 4).map(function (t) { return t.winkel + ' op ' + datum(t.dag) + ': twee keer ' + euro(t.bedrag); }).join('. ') +
+          '. Klopt dat niet? Bij een incasso kun je het bedrag binnen acht weken laten terugboeken via je bank.'
+      });
+    }
+
+    // creditcard en andere rekeningen: wat ik niet zie
+    var cc = r.cat('creditcard');
+    if (cc.totaal >= 100) {
+      adv.push({
+        id: 'creditcard', soort: 'inzicht', bespaar: 0, sleutels: [],
+        titel: euro(cc.totaal, false) + ' via je creditcard',
+        tekst: 'Wat je met je creditcard betaalde, zie ik hier niet. Daar zitten vaak abonnementen tussen. Loop het overzicht van je creditcard apart na.'
+      });
+    }
+
+    // achteraf betalen
+    var lenen = r.cat('lenen'), achteraf = lenen.winkels.filter(function (w) { return /klarna|riverty|in3|billink|tinka/i.test(w.naam); });
+    if (achteraf.length && som(achteraf, function (w) { return w.aantal; }) >= 4) {
+      adv.push({
+        id: 'achteraf', soort: 'check', bespaar: 0, sleutels: [],
+        titel: som(achteraf, function (w) { return w.aantal; }) + ' keer achteraf betaald',
+        tekst: 'Via ' + opsomming(achteraf.map(function (w) { return w.naam; })) + ', samen ' + euro(som(achteraf, function (w) { return w.totaal; }), false) +
+          '. Achteraf betalen maakt uitgeven makkelijker dan je wilt. Een gemiste termijn kost meteen geld.'
+      });
+    }
+
+    // al opgezegd: goed gedaan
+    var weg = r.gestopt.filter(function (s) { return s.type === 'opzegbaar'; });
+    if (weg.length) {
+      adv.push({
+        id: 'gestopt', soort: 'inzicht', bespaar: 0, sleutels: [],
+        titel: 'Dit zegde je al op',
+        tekst: opsomming(weg.slice(0, 6).map(function (s) { return s.naam; })) + '. Dat scheelt ' + euro(som(weg, function (s) { return s.perJaar; }), false) + ' per jaar.'
+      });
+    }
+
+    adv.sort(function (a, b) { return (a.soort === 'inzicht') - (b.soort === 'inzicht') || b.bespaar - a.bespaar; });
+    return adv;
+  }
+
+  /* ---------- je geldtype ---------- */
+
+  function geldtype(r) {
+    var a = function (id) { return r.cat(id).aandeel; };
+    var spaar = r.binnen > 0 ? (r.over) / r.binnen : 0;
+    var kandidaten = [
+      [r.opzegbaar.length / 9, 'De verzamelaar', 'Je hebt ' + r.opzegbaar.length + ' abonnementen lopen. Dat is meer dan de meeste mensen kunnen opnoemen.'],
+      [a('bezorgen') / 0.05, 'De thuisbezorger', 'De bezorger weet je adres uit zijn hoofd.'],
+      [spaar / 0.22, 'De bouwer', 'Van elke euro die binnenkwam, hield je ' + Math.round(spaar * 100) + ' cent over.'],
+      [(a('horeca') + a('uit')) / 0.13, 'De levensgenieter', 'Een tafel voor twee, een kaartje, nog een rondje. Je geld gaat naar momenten.'],
+      [a('boodschappen') / 0.2, 'De thuiskok', 'Je grootste vrije uitgave is de supermarkt. Je kookt zelf, en vaak.'],
+      [a('winkelen') / 0.14, 'De jager', 'Pakketjes weten je te vinden. Winkelen is je grootste verleiding.'],
+      [a('reizen') / 0.11, 'De reiziger', 'Je geeft je geld het liefst ergens anders uit.'],
+      [(r.uit > 0 ? r.vastPerJaar * r.periode.maanden / 12 / r.uit : 0) / 0.7, 'De vaste waarde', 'Het grootste deel van je geld is al weg voordat de maand begint.']
+    ].sort(function (x, y) { return y[0] - x[0]; });
+    var k = kandidaten[0][0] >= 0.75 ? kandidaten[0] : [1, 'De alleseter', 'Geen uitschieters. Je geld gaat een beetje overal heen.'];
+    return { naam: k[1], tekst: k[2] };
+  }
+
+  /* ---------- samenvatting voor je AI: geen namen van personen, geen rekeningnummers ---------- */
+
+  function samenvatting(r) {
+    var P = r.periode, regels = [];
+    regels.push('Periode: ' + datum(P.van, true) + ' tot en met ' + datum(P.tot, true) + ' (' + Math.round(P.maanden) + ' maanden)');
+    regels.push('Binnengekomen: ' + euro(r.binnen, false) + '. Uitgegeven: ' + euro(r.uit, false) + '. Naar sparen en beleggen: ' + euro(r.sparen, false) + '.');
+    regels.push('');
+    regels.push('UITGAVEN PER CATEGORIE');
+    r.cats.forEach(function (c) {
+      var top = c.id === 'personen' ? '' : c.winkels.slice(0, 4).map(function (w) { return w.naam + ' ' + euro(w.totaal, false); }).join(', ');
+      regels.push('- ' + c.label + ': ' + euro(c.totaal, false) + ' (' + Math.round(c.aandeel * 100) + '%)' + (top ? '. Grootste: ' + top : ''));
+    });
+    regels.push('');
+    regels.push('VASTE LASTEN EN ABONNEMENTEN DIE NU LOPEN');
+    r.vast.forEach(function (s) {
+      if (s.cat === 'personen') return;
+      regels.push('- ' + s.naam + ' (' + R.cats[s.cat].label + '): ' + euro(s.bedrag) + ' ' + s.ritme.label + ', ' + euro(s.perJaar, false) + ' per jaar' +
+        (s.stijging ? ', was ' + euro(s.stijging.van) : '') + (s.onzeker ? ', één keer gezien' : ''));
+    });
+    if (r.gestopt.length) {
+      regels.push('');
+      regels.push('GESTOPT IN DEZE PERIODE');
+      r.gestopt.forEach(function (s) { if (s.cat !== 'personen') regels.push('- ' + s.naam + ': ' + euro(s.perJaar, false) + ' per jaar'); });
+    }
+    return regels.join('\n');
+  }
+
+  root.MW = {
+    leesING: leesING, maakData: maakData, periodes: periodes, analyseer: analyseer, samenvatting: samenvatting,
+    euro: euro, getal: getal, datum: datum, maandJaar: maandJaar, meervoud: meervoud, opsomming: opsomming,
+    cats: R.cats, MAANDEN: MAANDEN
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
