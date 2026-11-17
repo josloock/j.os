@@ -515,7 +515,7 @@
       if (!f) return;
       think(L, t, 1);
       being(f.ctx, B, L, { t: t, cx: f.w / 2, cy: f.h / 2, R: Math.min(f.w, f.h) * 0.45, turn: 0, tilt: 0.3,
-        amp: 0.04, freq: 1.2, flow: 0.07, persp: 0.16, alpha: 1, back: 0, unit: 0.62,
+        amp: 0.04, freq: 1.2, flow: 0.07, persp: 0.16, alpha: 1, back: 0, unit: Math.max(0.55, Math.min(f.w, f.h) / 42),
         sizeBase: 0.55, sizeFace: 1.05, sizeShade: 0.34, ax: 0, ay: 0, az: 1, att: 0 });
     });
   }
