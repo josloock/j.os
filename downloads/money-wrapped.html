@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Money Wrapped, de losse versie. Dit bestand staat op je eigen computer en maakt geen verbinding met buiten.
      De bron staat op github.com/josloock/j.os in de map money-wrapped. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Hm3FJEwc2Rhxulan/l3LtSl9d7r3XywYLcRFDSo23Rw=' 'sha256-I3l7xfKYZuqi9WOB7dp7pPx9RFSMZxIAgKlOaUMVHgA=' 'sha256-RItoSpma9I65DNIm6W8ElplmGSn8zvcFE/fG0dyVRFo=' 'sha256-4iCu4psiysLWB7Cu2XqUv4Md1AipVnuIMMYKjW+rMoI=' 'sha256-j4K9hAqNJ2A/FRVc3/Wq4bxRbULZlngy8dAfuuMHevE=' 'sha256-LlnoHQThInRQxh+CbGNKSq3dMdau1CtCt4pffJmbjlw='; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Hm3FJEwc2Rhxulan/l3LtSl9d7r3XywYLcRFDSo23Rw=' 'sha256-I3l7xfKYZuqi9WOB7dp7pPx9RFSMZxIAgKlOaUMVHgA=' 'sha256-RItoSpma9I65DNIm6W8ElplmGSn8zvcFE/fG0dyVRFo=' 'sha256-os051XbpnTxwRXmyZCSCwPP+moLdr72/zgltTyev0AM=' 'sha256-j4K9hAqNJ2A/FRVc3/Wq4bxRbULZlngy8dAfuuMHevE=' 'sha256-CJbIz3L0iOS2MJi1JuDAj4h44g4STp1ZhpE84LTtkvk='; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Money Wrapped</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#F2EEE6">
 <style>
 /* J.OS — huisstijl: papier, inkt, Newsreader, één goud accent */
@@ -412,8 +413,8 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* Money Wrapped: bouwt voort op assets/site.css. Papier voor het overzicht,
-   espresso voor het verhaal, goud voor wat ertoe doet. */
+/* Money Wrapped: bouwt voort op assets/site.css. Eén kort overzicht:
+   je jaar, drie acties, je abonnementen. De rest zit ingeklapt. */
 
 .mw-start { margin-top: 48px; }
 .mw-drop {
@@ -431,16 +432,15 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 .mw-drop.is-over { border-color: var(--oker); background: #FBF8F1; }
 .mw-drop-title { font-size: clamp(26px, 3.4vw, 34px); font-weight: 340; line-height: 1.15; letter-spacing: -.012em; }
 .mw-drop .button { margin-top: 22px; cursor: pointer; }
-.mw-drop input:focus-visible + .mw-drop-note { outline: 2px solid var(--oker-dark); outline-offset: 6px; }
 .mw-drop-note { margin-top: 20px; max-width: 420px; font-size: 17px; color: var(--muted); }
+.mw-drop-alt { margin-top: 6px; }
+.mw-drop-alt .mw-link { margin-top: 0; min-height: 0; padding: 0; font-size: inherit; color: inherit; }
 .mw-offline { margin-top: 14px; display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px; border: 1px solid var(--oker); border-radius: 20px; font-size: 17px; color: var(--ink); text-align: left; }
 .mw-offline .toc-dot { width: 10px; height: 10px; }
 .mw-proof { margin: 24px auto 0; max-width: 640px; }
 .mw-proof .button, .mw-proof .mw-offline { display: flex; width: fit-content; max-width: 100%; }
 .mw-proof .button { margin-top: 16px; }
 .mw-proof .prompt { max-height: 220px; font-size: 15px; }
-.mw-drop-alt { margin-top: 6px; }
-.mw-drop-alt .mw-link { margin-top: 0; min-height: 0; padding: 0; font-size: inherit; color: inherit; }
 .mw-link {
   margin-top: 10px;
   min-height: 44px;
@@ -460,7 +460,7 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 .mw-error { margin-top: 16px; padding: 14px 18px; border-left: 3px solid var(--oker); background: #F8F5EF; color: var(--ink); }
 
 /* de balk boven het resultaat: welke cijfers, welke periode */
-.mw-bar { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.mw-bar { margin-top: 44px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
 .mw-bar-note { max-width: 560px; color: var(--body); }
 .mw-bar-note strong { font-weight: 500; color: var(--ink); }
 .mw-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -480,125 +480,31 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 .mw-bar-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 20px; }
 .mw-bar-links .mw-link { margin-top: 0; font-size: 16px; color: var(--muted); }
 
-/* ---------- het verhaal ---------- */
+/* ---------- je jaar ---------- */
 
-.mw-story { margin-top: 28px; display: flex; flex-direction: column; align-items: center; }
-.mw-phone {
-  position: relative;
-  width: 100%;
-  max-width: 430px;
-  height: min(700px, calc(100svh - 96px));
-  min-height: 540px;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--espresso);
-  color: var(--paper);
-  isolation: isolate;
-}
-.mw-phone:focus-visible { outline-offset: 4px; }
-/* het wezen, stil op de achtergrond */
-.mw-phone::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  right: -130px;
-  top: -130px;
-  width: 380px;
-  height: 380px;
-  border-radius: 50%;
-  background: radial-gradient(rgba(242, 238, 230, .2) 1.1px, transparent 1.7px) 0 0 / 10px 10px;
-  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
-}
-.mw-progress { position: absolute; z-index: 3; left: 18px; right: 18px; top: 16px; display: flex; gap: 4px; }
-.mw-progress span { flex: 1; height: 2px; border-radius: 2px; background: rgba(242, 238, 230, .24); transition: background .3s ease; }
-.mw-progress span.is-done { background: var(--gold); }
-
-.mw-slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 14px;
-  padding: 56px 30px 92px;
-  visibility: hidden;
-  opacity: 0;
-}
-.mw-slide.is-on { visibility: visible; opacity: 1; }
-.mw-slide.is-on > * { animation: rise .7s cubic-bezier(.2, .7, .2, 1) backwards; }
-.mw-slide.is-on > :nth-child(2) { animation-delay: .12s; }
-.mw-slide.is-on > :nth-child(3) { animation-delay: .3s; }
-.mw-slide.is-on > :nth-child(4) { animation-delay: .46s; }
-.mw-slide.is-on > :nth-child(5) { animation-delay: .6s; }
-.mw-slide .u path { animation: none; }
-.mw-slide.is-on .u path { animation: draw .9s cubic-bezier(.3, .6, .2, 1) .5s backwards; }
-
-.mw-kicker { font-size: 13px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(242, 238, 230, .62); }
-.mw-big {
-  font-size: clamp(52px, 15vw, 74px);
-  font-weight: 340;
-  line-height: 1;
-  letter-spacing: -.025em;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-.mw-big.mw-word { font-size: clamp(40px, 11.5vw, 54px); line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: normal; text-wrap: balance; }
-.mw-line { font-size: 22px; line-height: 1.3; color: rgba(242, 238, 230, .9); text-wrap: balance; }
-.mw-sub { font-size: 18px; color: rgba(242, 238, 230, .62); }
-.mw-rank { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; font-size: 18px; }
-.mw-rank li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
-.mw-rank-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mw-rank-val { color: rgba(242, 238, 230, .7); font-variant-numeric: tabular-nums; }
-.mw-rank-track { grid-column: 1 / -1; height: 4px; border-radius: 0 4px 4px 0; background: rgba(242, 238, 230, .34); }
-.mw-rank li:first-child .mw-rank-track { background: var(--gold); }
-.mw-mini { margin-top: 14px; height: 120px; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid rgba(242, 238, 230, .3); }
-.mw-mini span { flex: 1; max-width: 22px; min-height: 2px; border-radius: 4px 4px 0 0; background: rgba(242, 238, 230, .34); }
-.mw-mini span.is-top { background: var(--gold); }
-.mw-mini-labels { display: flex; gap: 6px; font-size: 12px; color: rgba(242, 238, 230, .6); }
-.mw-mini-labels span { flex: 1; max-width: 22px; text-align: center; }
-
-.mw-tap { position: absolute; z-index: 1; top: 40px; bottom: 80px; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.mw-tap-prev { left: 0; width: 34%; }
-.mw-tap-next { right: 0; width: 66%; }
-.mw-nav { position: absolute; z-index: 2; left: 22px; right: 22px; bottom: 22px; display: flex; justify-content: space-between; gap: 12px; }
-.mw-nav-btn {
-  min-height: 46px;
-  padding: 0 22px;
-  border: 1px solid rgba(242, 238, 230, .4);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--paper);
-  font: inherit;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background .2s ease, color .2s ease, opacity .2s ease;
-}
-.mw-nav-btn:focus-visible { outline-color: var(--gold); }
-.mw-nav-btn[disabled] { opacity: 0; pointer-events: none; }
-.mw-nav-next { margin-left: auto; background: var(--paper); border-color: var(--paper); color: var(--ink); }
-.mw-nav-next:hover { background: #fff; }
-.mw-skip { margin-top: 14px; font-size: 16px; color: var(--muted); }
-.mw-skip a { display: inline-flex; align-items: center; min-height: 44px; }
-
-/* ---------- het overzicht ---------- */
-
-.mw-lead { margin: 18px auto 0; max-width: 600px; text-align: center; color: var(--body); }
-.mw-lead strong { font-weight: 500; color: var(--ink); }
-
-.mw-tiles { margin-top: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 24px; }
+.mw-year { margin-top: 44px; }
+.mw-tiles { margin-top: 24px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 24px; }
 .mw-tile { display: flex; flex-direction: column; gap: 6px; padding: 16px 0 20px; border-top: 1px solid var(--line); min-width: 0; }
 .mw-tile-value { font-size: clamp(30px, 4vw, 38px); font-weight: 340; line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .mw-tile-sub { font-size: 16px; color: var(--muted); }
 
-/* kolommen per maand */
-.mw-chart { margin-top: 28px; }
-.mw-plot { position: relative; height: 230px; margin-left: 58px; }
-.mw-gridline { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--soft); }
-.mw-gridline.is-base { border-top-color: var(--line); }
-.mw-gridline span { position: absolute; right: 100%; top: -.7em; margin-right: 10px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mw-two { margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 40px; }
+.mw-two > div { min-width: 0; padding-top: 16px; border-top: 1px solid var(--line); }
+
+/* de grootste categorieën, kort */
+.mw-topcats { margin-top: 14px; display: flex; flex-direction: column; gap: 11px; }
+.mw-topcats li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; align-items: baseline; font-size: 18px; }
+.mw-topcats-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mw-topcats-val { font-variant-numeric: tabular-nums; color: var(--body); }
+.mw-topcats-track { grid-column: 1 / -1; height: 6px; }
+.mw-topcats-track span { display: block; height: 100%; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--line); }
+.mw-topcats li.is-rest { color: var(--muted); }
+.mw-topcats li.is-rest .mw-topcats-track span { background: var(--leader); }
+
+/* kolommen per maand, compact: het hoogste en het gemiddelde staan erbij */
+.mw-chart { margin-top: 14px; }
+.mw-plot { position: relative; height: 168px; margin-top: 26px; border-bottom: 1px solid var(--line); }
 .mw-avg { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--oker); }
-.mw-avg span { position: absolute; right: 0; bottom: 3px; padding: 0 2px; font-size: 14px; color: var(--oker-dark); background: var(--paper); }
 .mw-cols { position: absolute; inset: 0; display: flex; align-items: stretch; gap: 2px; }
 .mw-col {
   position: relative;
@@ -617,33 +523,120 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 .mw-col.is-top .mw-col-bar { background: var(--oker); }
 .mw-col:hover .mw-col-bar, .mw-col:focus-visible .mw-col-bar { background: var(--oker-dark); }
 .mw-col-val { position: absolute; left: 50%; transform: translate(-50%, -6px); font-size: 14px; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.mw-xlabels { margin: 8px 0 0 58px; display: flex; gap: 2px; font-size: 14px; color: var(--muted); }
+.mw-col:first-child .mw-col-val { left: 0; transform: translate(0, -6px); }
+.mw-col:last-child .mw-col-val { left: auto; right: 0; transform: translate(0, -6px); }
+.mw-xlabels { margin-top: 6px; display: flex; gap: 2px; font-size: 13px; color: var(--muted); }
 .mw-xlabels span { flex: 1; min-width: 0; text-align: center; white-space: nowrap; }
-.mw-chart-note { margin-top: 12px; font-size: 16px; color: var(--muted); text-align: center; }
+.mw-xlabels.is-dense span:nth-child(even) { visibility: hidden; }
+.mw-chart-note { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--muted); }
+.mw-chart-note i { display: inline-block; width: 18px; height: 0; margin-right: 6px; border-top: 1px solid var(--oker); vertical-align: middle; }
 
-/* categorieën: een rij per categorie, open te klappen */
-.mw-cats { margin-top: 24px; border-top: 1px solid var(--line); }
+/* ---------- je drie acties ---------- */
+
+.mw-actions { margin-top: 28px; }
+.mw-action { display: flex; gap: 20px; padding: 30px 0 32px; border-top: 1px solid var(--line); }
+.mw-actions > .mw-action:last-child { border-bottom: 1px solid var(--line); }
+.mw-action-num { flex: none; width: 40px; font-size: 44px; font-weight: 340; line-height: .95; letter-spacing: -.04em; color: var(--oker); }
+.mw-action-body { flex: 1; min-width: 0; }
+.mw-action h3 { font-size: clamp(27px, 3.4vw, 32px); font-weight: 400; line-height: 1.15; letter-spacing: -.012em; }
+.mw-action-why { margin-top: 10px; color: var(--body); }
+.mw-action-save { display: inline-block; margin-top: 14px; padding: 4px 13px; border: 1px solid var(--oker); border-radius: 999px; font-size: 16px; color: var(--oker-dark); font-variant-numeric: tabular-nums; }
+.mw-action-items { margin-top: 16px; border-top: 1px solid var(--soft); }
+.mw-actions-rest { margin-top: 0; }
+.mw-actions-rest .mw-action { padding: 24px 0 26px; }
+.mw-actions-rest .mw-action:first-child { border-top: 0; }
+.mw-actions-rest .mw-action-num { font-size: 34px; color: var(--leader); }
+.mw-actions-rest .mw-action h3 { font-size: 25px; }
+
+/* een abonnement of vaste last: naam, wat het kost, waar je opzegt */
+.mw-sub { display: grid; grid-template-columns: minmax(0, 1fr) auto 168px; gap: 2px 16px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--soft); }
+.mw-sub.no-link { grid-template-columns: minmax(0, 1fr) auto; }
+.mw-sub-main { min-width: 0; }
+.mw-sub-name { display: block; font-size: 19px; overflow-wrap: anywhere; }
+.mw-sub-note { display: block; font-size: 16px; color: var(--muted); }
+.mw-sub-note b { font-weight: 500; color: var(--oker-dark); }
+.mw-sub-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mw-sub-amount { display: block; font-size: 19px; }
+.mw-sub-per { display: block; font-size: 15px; color: var(--muted); }
+.mw-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 16px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease;
+}
+.mw-go:hover { background: var(--espresso); color: var(--paper); }
+.mw-go svg { flex: none; width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.mw-go.is-zoek { border-color: var(--soft); color: var(--muted); }
+.mw-go.is-zoek:hover { color: var(--paper); }
+
+.mw-lead { margin: 18px auto 0; max-width: 600px; text-align: center; color: var(--body); }
+.mw-lead strong { font-weight: 500; color: var(--ink); }
+.mw-subs { margin-top: 24px; border-top: 1px solid var(--line); }
+.mw-meer .mw-subs { margin-top: 0; border-top: 0; }
+.mw-foot-note { margin-top: 14px; font-size: 16px; color: var(--muted); }
+
+/* uitklappen: meer acties, alle abonnementen */
+.mw-meer summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  list-style: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+.mw-meer summary::-webkit-details-marker { display: none; }
+.mw-meer summary span { text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+.mw-meer summary::after { content: "+"; color: var(--oker); font-size: 22px; line-height: 1; }
+.mw-meer[open] summary::after { content: "\2212"; }
+.mw-meer summary:hover { color: var(--oker-dark); }
+.mw-meer[open] summary { border-bottom: 1px solid var(--soft); }
+
+/* meer inzicht: alles wat niet meteen hoeft */
+.mw-folds { margin-top: 28px; border-top: 1px solid var(--line); }
+.mw-fold { border-bottom: 1px solid var(--line); }
+.mw-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; list-style: none; font-size: 23px; cursor: pointer; }
+.mw-fold > summary::-webkit-details-marker { display: none; }
+.mw-fold > summary::after { content: "+"; flex: none; color: var(--oker); font-size: 26px; line-height: 1; }
+.mw-fold[open] > summary::after { content: "\2212"; }
+.mw-fold > summary:hover { color: var(--oker-dark); }
+.mw-fold > :last-child { margin-bottom: 28px; }
+.mw-fold-lede { color: var(--body); }
+.mw-fold .button { margin-top: 18px; }
+.mw-fold .prompt { max-height: 260px; font-size: 15px; }
+
+.mw-cats { margin-top: 16px; border-top: 1px solid var(--soft); }
 .mw-cat { border-bottom: 1px solid var(--soft); }
 .mw-cat summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto 52px;
-  gap: 6px 16px;
+  gap: 5px 16px;
   align-items: baseline;
-  padding: 14px 0 15px;
+  padding: 12px 0 13px;
   list-style: none;
   cursor: pointer;
 }
 .mw-cat summary::-webkit-details-marker { display: none; }
-.mw-cat-name { font-size: 21px; min-width: 0; }
+.mw-cat-name { font-size: 19px; min-width: 0; }
 .mw-cat-name::after { content: "+"; margin-left: 10px; color: var(--oker); }
 .mw-cat[open] .mw-cat-name::after { content: "\2212"; }
-.mw-cat-sum { font-size: 21px; font-variant-numeric: tabular-nums; text-align: right; }
+.mw-cat-sum { font-size: 19px; font-variant-numeric: tabular-nums; text-align: right; }
 .mw-cat-pct { font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
-.mw-track { grid-column: 1 / -1; height: 8px; }
+.mw-track { grid-column: 1 / -1; height: 6px; }
 .mw-track span { display: block; height: 100%; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--line); }
 .mw-cat summary:hover .mw-track span { background: var(--oker-dark); }
-.mw-shops { padding: 2px 0 18px; }
-.mw-shop { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 14px; align-items: center; padding: 7px 0; font-size: 17px; color: var(--body); }
+.mw-shops { padding: 2px 0 16px; }
+.mw-shop { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 14px; align-items: center; padding: 6px 0; font-size: 17px; color: var(--body); }
 .mw-shop-name { min-width: 0; overflow-wrap: anywhere; }
 .mw-shop-name small { margin-left: 8px; font-size: 15px; color: var(--muted); white-space: nowrap; }
 .mw-shop-sum { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -660,54 +653,15 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 }
 .mw-more { padding-top: 8px; font-size: 15px; color: var(--muted); }
 
-/* vaste lasten */
-.mw-group { margin-top: 36px; }
-.mw-group-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 20px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
-.mw-group-head h3 { font-size: 26px; font-weight: 400; letter-spacing: -.01em; }
-.mw-group-head p { font-size: 17px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.mw-group-lede { margin-top: 10px; font-size: 17px; color: var(--muted); }
-.mw-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 14px; align-items: start; padding: 13px 0; border-bottom: 1px solid var(--soft); }
-.mw-row.no-check { grid-template-columns: minmax(0, 1fr) auto; }
-.mw-check { position: relative; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin: -1px 0 0 -4px; cursor: pointer; }
-.mw-check input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-.mw-check span { width: 20px; height: 20px; border: 1.5px solid var(--line); border-radius: 4px; background: transparent; }
-.mw-check input:checked + span { background: var(--oker) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M5 10.5l3.2 3.2L15 6.8' fill='none' stroke='%23F2EEE6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 100% no-repeat; border-color: var(--oker); }
-.mw-check input:focus-visible + span { outline: 2px solid var(--oker-dark); outline-offset: 3px; }
-.mw-row-main { min-width: 0; }
-.mw-row-name { display: block; font-size: 20px; overflow-wrap: anywhere; }
-.mw-row.is-picked .mw-row-name { text-decoration: line-through; text-decoration-color: var(--oker); }
-.mw-row-note { display: block; margin-top: 2px; font-size: 16px; color: var(--muted); }
-.mw-row-note b { font-weight: 500; color: var(--oker-dark); }
-.mw-row-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.mw-row-amount { display: block; font-size: 20px; }
-.mw-row-year { display: block; margin-top: 2px; font-size: 16px; color: var(--muted); }
-.mw-row-year span + span::before { content: ", "; }
+.mw-group { margin-top: 24px; }
+.mw-group-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 20px; padding-bottom: 8px; border-bottom: 1px solid var(--soft); }
+.mw-group-head h3 { font-size: 21px; font-weight: 500; }
+.mw-group-head p { font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-.mw-total { margin-top: 28px; padding: 24px 24px 26px; border-radius: 6px; background: var(--espresso); color: var(--paper); }
-.mw-total-text { font-size: clamp(24px, 3vw, 30px); font-weight: 340; line-height: 1.2; letter-spacing: -.012em; text-wrap: balance; }
-.mw-total-text b { font-weight: 340; color: #E4C465; white-space: nowrap; }
-.mw-total .button { margin-top: 18px; background: var(--paper); color: var(--ink); }
-.mw-total .button:hover { background: #fff; color: var(--ink); }
-.mw-total .hint { margin-top: 12px; font-size: 16px; color: rgba(242, 238, 230, .66); }
-.mw-total .prompt { max-height: 180px; border-color: rgba(242, 238, 230, .2); background: rgba(242, 238, 230, .06); color: rgba(242, 238, 230, .82); font-size: 15px; }
-
-/* advies */
-.mw-advice { margin-top: 28px; border-bottom: 1px solid var(--line); }
-.mw-adv { display: flex; gap: 20px; padding: 26px 0 28px; border-top: 1px solid var(--line); }
-.mw-adv-num { flex: none; width: 44px; letter-spacing: -.04em; font-size: 38px; font-weight: 340; line-height: .95; color: var(--oker); }
-.mw-adv-body { flex: 1; min-width: 0; }
-.mw-adv h3 { font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
-.mw-adv p { margin-top: 8px; color: var(--body); }
-.mw-adv-save { display: inline-block; margin-top: 12px; padding: 4px 12px; border: 1px solid var(--oker); border-radius: 999px; font-size: 16px; color: var(--oker-dark); }
-.mw-adv.is-info .mw-adv-num { color: var(--leader); }
-
-.mw-list { margin-top: 24px; border-top: 1px solid var(--line); }
-.mw-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--soft); }
+.mw-list { margin-top: 4px; border-top: 1px solid var(--soft); }
+.mw-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 16px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--soft); }
 .mw-list small { display: block; font-size: 16px; color: var(--muted); }
 .mw-list span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
-
-.mw-ai { margin: 24px auto 0; max-width: 640px; color: var(--body); }
-.mw-ai .prompt { max-height: 240px; font-size: 15px; }
 
 .mw-tip {
   position: fixed;
@@ -725,27 +679,21 @@ button.button { border: 0; font-family: inherit; cursor: pointer; }
 
 @media (max-width: 700px) {
   .mw-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+  .mw-two { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .mw-start { margin-top: 36px; }
   .mw-drop { padding: 34px 18px 28px; }
-  .mw-phone { border-radius: 10px; }
-  .mw-slide { padding: 52px 24px 88px; }
-  .mw-plot, .mw-xlabels { margin-left: 46px; }
-  .mw-plot { height: 200px; }
-  .mw-gridline span, .mw-xlabels { font-size: 12px; }
-  .mw-xlabels.is-dense span:nth-child(even) { visibility: hidden; }
-  .mw-cat summary { grid-template-columns: minmax(0, 1fr) auto 40px; gap: 6px 10px; }
-  .mw-cat-name, .mw-cat-sum { font-size: 19px; }
+  .mw-action { gap: 12px; padding: 26px 0 28px; }
+  .mw-action-num { width: 30px; font-size: 36px; }
+  .mw-actions-rest .mw-action-num { font-size: 30px; }
+  .mw-sub { grid-template-columns: minmax(0, 1fr) auto; }
+  .mw-sub .mw-go { grid-column: 1 / -1; justify-self: start; min-height: 36px; padding: 0; border: 0; text-decoration: underline; text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+  .mw-sub .mw-go:hover { background: none; color: var(--oker-dark); }
+  .mw-fold > summary { font-size: 21px; }
+  .mw-cat summary { grid-template-columns: minmax(0, 1fr) auto 40px; gap: 5px 10px; }
   .mw-shop { grid-template-columns: minmax(0, 1fr) auto; }
   .mw-move { grid-column: 1 / -1; justify-self: start; }
-  .mw-row-name, .mw-row-amount { font-size: 18px; }
-  .mw-row-year span { display: block; }
-  .mw-row-year span + span::before { content: none; }
-  .mw-adv { gap: 12px; }
-  .mw-adv-num { width: 36px; font-size: 30px; }
-  .mw-adv h3 { font-size: 23px; }
-  .mw-total { padding: 20px 18px 22px; }
 }
 
 </style>
@@ -814,7 +762,7 @@ Kies je bestand
 <span class="step-num" aria-hidden="true">3</span>
 <div class="step-body">
 <h3>Bekijk je jaar</h3>
-<p>Eerst je jaar in een paar beelden. Daarna het hele overzicht, je vaste lasten en wat je kunt opzeggen.</p>
+<p>Je ziet je jaar in één overzicht, met de drie dingen waar je het meeste aan hebt. Bij elk abonnement staat waar je opzegt.</p>
 <p class="say">&lsquo;Waar ging mijn <span class="u">geld heen?<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
 </div>
 </li>
@@ -829,72 +777,67 @@ Kies je bestand
 
 <div class="mw-bar" id="balk"></div>
 
-<section class="mw-story" id="verhaal" aria-label="Je jaar in beelden" aria-roledescription="carrousel">
-<div class="mw-phone" id="telefoon" tabindex="0">
-<div class="mw-progress" id="voortgang" aria-hidden="true"></div>
-<div class="mw-slides" id="dias" aria-live="polite"></div>
-<button class="mw-tap mw-tap-prev" type="button" id="tik-terug" tabindex="-1" aria-hidden="true"></button>
-<button class="mw-tap mw-tap-next" type="button" id="tik-verder" tabindex="-1" aria-hidden="true"></button>
-<div class="mw-nav">
-<button class="mw-nav-btn" type="button" id="terug">Terug</button>
-<button class="mw-nav-btn mw-nav-next" type="button" id="verder">Verder</button>
-</div>
-</div>
-<p class="mw-skip"><a href="#kort">Sla over, naar het overzicht</a></p>
-</section>
-
-<section class="section" id="kort" aria-labelledby="kort-kop">
-<h2 class="caps caps-wide center" id="kort-kop">In het kort</h2>
+<section class="mw-year" id="jaar" aria-labelledby="jaar-kop">
+<h2 class="caps caps-wide center" id="jaar-kop">Je jaar</h2>
 <div class="mw-tiles" id="tegels"></div>
-</section>
-
-<section class="section" aria-labelledby="maand-kop">
-<h2 class="caps caps-wide center" id="maand-kop">Per maand</h2>
-<p class="mw-lead" id="maand-tekst"></p>
-<div class="mw-chart" id="maanden"></div>
-</section>
-
-<section class="section" aria-labelledby="cat-kop">
-<h2 class="caps caps-wide center" id="cat-kop">Waar het heen ging</h2>
-<p class="mw-lead">Klik op een regel voor de winkels erachter. Staat er iets verkeerd, verplaats het dan.</p>
-<div class="mw-cats" id="categorieen"></div>
-</section>
-
-<section class="section" id="vast" aria-labelledby="vast-kop">
-<h2 class="caps caps-wide center" id="vast-kop">Vaste lasten en abonnementen</h2>
-<p class="mw-lead" id="vast-tekst"></p>
-<div id="opzegbaar"></div>
-<div class="mw-total" id="opzeg-totaal">
-<p class="mw-total-text" id="opzeg-tekst" aria-live="polite"></p>
-<button class="button" type="button" data-copy="#opzeg-prompt">
-<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
-<span>Kopieer mijn opzeglijst</span>
-</button>
-<p class="hint">Plak hem in Claude of ChatGPT. Je krijgt per abonnement hoe je opzegt en een brief die je kunt versturen.</p>
-<pre class="prompt" id="opzeg-prompt" tabindex="0"></pre>
+<div class="mw-two">
+<div>
+<h3 class="caps">Waar het heen ging</h3>
+<ol class="mw-topcats" id="top-cats"></ol>
 </div>
+<div>
+<h3 class="caps">Per maand</h3>
+<div class="mw-chart" id="maanden"></div>
+</div>
+</div>
+</section>
+
+<section class="section" id="acties" aria-labelledby="acties-kop">
+<h2 class="caps caps-wide center" id="acties-kop">Je drie acties</h2>
+<ol class="mw-actions" id="top-acties"></ol>
+<details class="mw-meer" id="meer-acties">
+<summary><span id="meer-acties-tekst">Meer acties</span></summary>
+<ol class="mw-actions mw-actions-rest" id="rest-acties"></ol>
+</details>
+</section>
+
+<section class="section" id="abonnementen" aria-labelledby="abo-kop">
+<h2 class="caps caps-wide center" id="abo-kop">Je abonnementen</h2>
+<p class="mw-lead" id="abo-tekst"></p>
+<ul class="mw-subs" id="abo-lijst"></ul>
+<details class="mw-meer" id="meer-abos">
+<summary><span id="meer-abos-tekst">Toon alle</span></summary>
+<ul class="mw-subs" id="abo-rest"></ul>
+</details>
+<p class="mw-foot-note">Een link opent de website van de aanbieder. Daar log je zelf in. Staat er geen opzegpagina bij, dan zoekt de link hem voor je op.</p>
+</section>
+
+<section class="section" id="meer" aria-labelledby="meer-kop">
+<h2 class="caps caps-wide center" id="meer-kop">Meer inzicht</h2>
+<div class="mw-folds">
+<details class="mw-fold">
+<summary>Alle categorieën en winkels</summary>
+<p class="mw-fold-lede">Klik op een regel voor de winkels erachter. Staat er iets verkeerd, verplaats het dan.</p>
+<div class="mw-cats" id="categorieen"></div>
+</details>
+<details class="mw-fold">
+<summary>Alle vaste lasten</summary>
+<p class="mw-fold-lede" id="vast-tekst"></p>
 <div id="vaste-lasten"></div>
-</section>
-
-<section class="section" id="advies" aria-labelledby="advies-kop">
-<h2 class="caps caps-wide center" id="advies-kop">Advies</h2>
-<ol class="mw-advice" id="adviezen"></ol>
-</section>
-
-<section class="section" aria-labelledby="groot-kop">
-<h2 class="caps caps-wide center" id="groot-kop">Grootste losse uitgaven</h2>
+</details>
+<details class="mw-fold" id="groot-vak">
+<summary>Grootste losse uitgaven</summary>
 <ul class="mw-list" id="grootste"></ul>
-</section>
-
-<section class="section" aria-labelledby="ai-kop">
-<h2 class="caps caps-wide center" id="ai-kop">Laat je AI meedenken</h2>
-<div class="mw-ai">
-<p>Wil je verder dan deze pagina? Kopieer een samenvatting met een prompt erbij en plak hem in je AI. Er staan geen namen van personen en geen rekeningnummers in. Je ziet hieronder precies wat je kopieert.</p>
+</details>
+<details class="mw-fold">
+<summary>Verder met je AI</summary>
+<p class="mw-fold-lede">Kopieer een samenvatting met een prompt erbij en plak hem in Claude of ChatGPT. Je AI denkt mee, zoekt op hoe je opzegt en schrijft de opzegbrieven. Er staan geen namen van personen en geen rekeningnummers in. Hieronder zie je precies wat je kopieert.</p>
 <button class="button" type="button" data-copy="#ai-prompt">
 <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
 <span>Kopieer samenvatting en prompt</span>
 </button>
 <pre class="prompt" id="ai-prompt" tabindex="0"></pre>
+</details>
 </div>
 </section>
 
@@ -2318,21 +2261,21 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
       dubbel: dubbel, eind: data.eind, begin: data.begin
     };
     res.cat = function (id) { return cats[id] || { id: id, label: R.cats[id].label, totaal: 0, aantal: 0, winkels: [], aandeel: 0 }; };
-    res.advies = maakAdvies(res);
-    res.type = geldtype(res);
+    res.acties = maakActies(res);
     return res;
   }
 
-  /* ---------- het advies ---------- */
+  /* ---------- de acties: wat je met dit overzicht kunt doen, de belangrijkste eerst ---------- */
 
+  // per soort: [hoe het heet, de actie, de reden erbij]
   var SOORTEN = {
-    video: ['streamingdiensten', 'Kijk je ze echt allemaal tegelijk? Houd er één aan en wissel per maand. Je zegt ze per maand op en bent zo weer terug.'],
-    muziek: ['muziekdiensten', 'Eén is genoeg. Je muziek en je lijsten neem je mee.'],
-    opslag: ['diensten voor opslag', 'Kies één plek voor je foto’s en bestanden.'],
-    ai: ['AI-abonnementen', 'Kies er één voor dagelijks werk. Een tweede neem je alleen de maand dat je hem nodig hebt.'],
-    nieuws: ['abonnementen op nieuws', 'Lees je ze allemaal? Kranten geven vaak korting als je wilt opzeggen.'],
-    boeken: ['abonnementen op boeken', 'Luister of lees je bij allebei?'],
-    sportschool: ['sportabonnementen', 'Naar welke ga je echt?']
+    video: ['streamingdiensten', 'Houd één streamingdienst aan', 'Wissel per maand. Je zegt zo op en bent zo weer terug.'],
+    muziek: ['muziekdiensten', 'Kies één muziekdienst', 'Je muziek en je lijsten neem je mee.'],
+    opslag: ['diensten voor opslag', 'Kies één plek voor je opslag', 'Zet je foto’s en bestanden bij elkaar.'],
+    ai: ['AI-abonnementen', 'Kies één AI-abonnement', 'Een tweede neem je alleen de maand dat je hem nodig hebt.'],
+    nieuws: ['abonnementen op nieuws', 'Kies welk nieuws je echt leest', 'Kranten geven vaak korting als je wilt opzeggen.'],
+    boeken: ['abonnementen op boeken', 'Kies één abonnement op boeken', 'Luister of lees je bij allebei?'],
+    sportschool: ['sportabonnementen', 'Kies één sportabonnement', 'Naar welke ga je echt?']
   };
 
   function opsomming(lijst) {
@@ -2340,64 +2283,77 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     return lijst.slice(0, -1).join(', ') + ' en ' + lijst[lijst.length - 1];
   }
 
-  function maakAdvies(r) {
-    var adv = [], P = r.periode, gebruikt = {};
+  function maakActies(r) {
+    var acties = [], P = r.periode, gebruikt = {};
     var maandNu = datumVan(r.eind).getUTCMonth() + 1;
+    function perJaar(lijst) { return som(lijst, function (s) { return s.perJaar; }); }
+    function namen(lijst) { return opsomming(lijst.map(function (s) { return s.naam; })); }
 
-    // dubbele abonnementen
+    // dubbel: twee of meer van hetzelfde
     Object.keys(SOORTEN).forEach(function (soort) {
       var lijst = r.vast.filter(function (s) { return s.soort === soort; });
       if (lijst.length < 2) return;
-      var totaal = som(lijst, function (s) { return s.perJaar; }), duurste = Math.max.apply(null, lijst.map(function (s) { return s.perJaar; }));
+      var totaal = perJaar(lijst), duurste = Math.max.apply(null, lijst.map(function (s) { return s.perJaar; }));
       lijst.forEach(function (s) { gebruikt[s.sleutel] = 1; });
-      adv.push({
-        id: 'dubbel-' + soort, soort: 'actie', bespaar: totaal - duurste, sleutels: lijst.map(function (s) { return s.sleutel; }),
-        titel: 'Je betaalt voor ' + lijst.length + ' ' + SOORTEN[soort][0],
-        tekst: opsomming(lijst.map(function (s) { return s.naam; })) + '. Samen ' + euro(totaal, false) + ' per jaar. ' + SOORTEN[soort][1]
+      acties.push({
+        id: 'dubbel-' + soort, titel: SOORTEN[soort][1], score: totaal - duurste, items: lijst, opzeg: true,
+        waarom: 'Je betaalt voor ' + lijst.length + ' ' + SOORTEN[soort][0] + ' tegelijk, samen ' + euro(totaal, false) + ' per jaar. ' + SOORTEN[soort][2],
+        label: 'Scheelt tot ' + euro(totaal - duurste, false) + ' per jaar'
       });
     });
+
+    // twee keer afgeschreven: geld dat je terug kunt halen
+    if (r.dubbel.length) {
+      var terug = som(r.dubbel, function (t) { return t.bedrag; });
+      acties.push({
+        id: 'tweekeer', titel: 'Vraag je geld terug', score: terug + 150, items: [],
+        waarom: r.dubbel.slice(0, 3).map(function (t) { return t.winkel + ' schreef op ' + datum(t.dag) + ' twee keer ' + euro(t.bedrag) + ' af'; }).join('. ') +
+          '. Klopt dat niet? Een incasso kun je binnen acht weken laten terugboeken via je bank.',
+        label: 'Levert ' + euro(terug) + ' op'
+      });
+    }
 
     // jaarabonnementen die binnenkort verlengen
     var straks = r.vast.filter(function (s) { return s.ritme.id === 'jaar' && s.type !== 'vast' && s.volgende >= r.eind - 7 && s.volgende <= r.eind + 100; });
     if (straks.length) {
-      adv.push({
-        id: 'verlenging', soort: 'actie', bespaar: 0, sleutels: straks.map(function (s) { return s.sleutel; }),
-        titel: straks.length === 1 ? 'Dit jaarabonnement wordt binnenkort verlengd' : 'Deze jaarabonnementen worden binnenkort verlengd',
-        tekst: opsomming(straks.map(function (s) { return s.naam + ' rond ' + datum(s.volgende) + ' (' + euro(s.bedrag, false) + ')'; })) +
-          '. Wil je ervan af? Zeg dan nu op. Na de verlenging zit je vaak weer een jaar vast.'
+      acties.push({
+        id: 'verlenging', score: perJaar(straks) * 1.2, items: straks, opzeg: true,
+        titel: straks.length === 1 ? 'Beslis over ' + straks[0].naam + ' voor ' + datum(straks[0].volgende) : 'Zeg op voordat het verlengt',
+        waarom: (straks.length === 1 ? 'Dit jaarabonnement wordt' : 'Deze ' + straks.length + ' jaarabonnementen worden') + ' binnenkort verlengd. Daarna zit je vaak weer een jaar vast.',
+        label: 'Scheelt ' + euro(perJaar(straks), false) + ' als je opzegt'
       });
     }
 
     // duurder geworden
-    var duurder = r.vast.filter(function (s) { return s.stijging && s.stijging.perJaar >= 6 && s.type !== 'vast'; }).sort(function (a, b) { return b.stijging.perJaar - a.stijging.perJaar; });
+    var duurder = r.vast.filter(function (s) { return s.stijging && s.stijging.perJaar >= 6 && s.type !== 'vast'; })
+      .sort(function (a, b) { return b.stijging.perJaar - a.stijging.perJaar; });
     if (duurder.length) {
-      adv.push({
-        id: 'duurder', soort: 'check', bespaar: 0, sleutels: duurder.map(function (s) { return s.sleutel; }),
-        titel: (duurder.length === 1 ? duurder[0].naam + ' is' : duurder.length + ' vaste lasten zijn') + ' duurder geworden',
-        tekst: duurder.slice(0, 5).map(function (s) {
-          return s.naam + ' ging van ' + euro(s.stijging.van) + ' naar ' + euro(s.stijging.naar) + ' ' + s.ritme.label;
-        }).join('. ') + '. Samen ' + euro(som(duurder, function (s) { return s.stijging.perJaar; }), false) + ' per jaar meer. Is het je dat nog waard?'
+      var meer = som(duurder, function (s) { return s.stijging.perJaar; });
+      acties.push({
+        id: 'duurder', titel: 'Loop na wat duurder werd', score: meer * 0.5, items: duurder, opzeg: true,
+        waarom: (duurder.length === 1 ? duurder[0].naam + ' kost' : duurder.length + ' vaste lasten kosten samen') + ' meer dan een jaar geleden. Is het je dat nog waard?',
+        label: 'Kost je ' + euro(meer, false) + ' per jaar meer'
       });
     }
 
     // klein en vergeten
     var klein = r.opzegbaar.filter(function (s) { return s.perMaand <= 10 && !gebruikt[s.sleutel]; });
     if (klein.length >= 2) {
-      adv.push({
-        id: 'klein', soort: 'check', bespaar: 0, sleutels: klein.map(function (s) { return s.sleutel; }),
-        titel: klein.length + ' kleine abonnementen onder de tien euro',
-        tekst: opsomming(klein.slice(0, 8).map(function (s) { return s.naam; })) + '. Samen ' + euro(som(klein, function (s) { return s.perJaar; }), false) +
-          ' per jaar. Kleine bedragen vallen niet op. Weet je bij elk nog waarvoor het is?'
+      acties.push({
+        id: 'klein', titel: 'Ruim je kleine abonnementen op', score: perJaar(klein) * 0.5, items: klein, opzeg: true,
+        waarom: klein.length + ' abonnementen onder de tien euro per maand. Kleine bedragen vallen niet op. Weet je bij elk nog waarvoor het is?',
+        label: 'Samen ' + euro(perJaar(klein), false) + ' per jaar'
       });
     }
 
     // loterijen
-    var lot = r.cat('loterij');
+    var loten = r.vast.filter(function (s) { return s.cat === 'loterij'; }), lot = r.cat('loterij');
     if (lot.totaal >= 60) {
-      adv.push({
-        id: 'loterij', soort: 'check', bespaar: 0, sleutels: r.vast.filter(function (s) { return s.cat === 'loterij'; }).map(function (s) { return s.sleutel; }),
-        titel: euro(lot.totaal / P.maanden * 12, false) + ' per jaar aan loterijen',
-        tekst: opsomming(lot.winkels.slice(0, 4).map(function (w) { return w.naam; })) + '. Heb je weleens uitgerekend wat je ervoor terugkreeg?'
+      var lotJaar = lot.totaal / P.maanden * 12;
+      acties.push({
+        id: 'loterij', titel: 'Reken je loterij na', score: lotJaar * 0.5, items: loten, opzeg: true,
+        waarom: 'Je betaalt ' + euro(lotJaar, false) + ' per jaar aan loten. Heb je weleens uitgerekend wat je ervoor terugkreeg?',
+        label: 'Samen ' + euro(lotJaar, false) + ' per jaar'
       });
     }
 
@@ -2405,108 +2361,71 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     var bez = r.cat('bezorgen');
     if (bez.aantal >= 6) {
       var gem = bez.totaal / bez.aantal;
-      adv.push({
-        id: 'bezorgen', soort: 'actie', bespaar: gem * 12, sleutels: [],
-        titel: bez.aantal + ' keer eten laten bezorgen',
-        tekst: 'Samen ' + euro(bez.totaal, false) + ', gemiddeld ' + euro(gem, false) + ' per keer. Eén keer per maand minder scheelt ' + euro(gem * 12, false) + ' per jaar.'
+      acties.push({
+        id: 'bezorgen', titel: 'Bestel één keer per maand minder', score: gem * 12 * 0.6, items: [],
+        waarom: 'Je liet ' + bez.aantal + ' keer eten bezorgen voor ' + euro(bez.totaal, false) + '. Dat is gemiddeld ' + euro(gem, false) + ' per keer.',
+        label: 'Scheelt ' + euro(gem * 12, false) + ' per jaar'
+      });
+    }
+
+    // verzekeringen
+    var verz = r.vast.filter(function (s) { return s.cat === 'verzekeringen'; }), zorg = verz.filter(function (s) { return s.soort === 'zorg'; });
+    if (verz.length) {
+      var nu = zorg.length && maandNu >= 11, tekst;
+      if (nu) tekst = 'Je betaalt ' + euro(perJaar(zorg), false) + ' per jaar aan ' + namen(zorg) + '. Half november zijn de nieuwe premies bekend en je kunt tot en met 31 december overstappen.';
+      else tekst = 'Je betaalt ' + euro(perJaar(verz), false) + ' per jaar aan ' + namen(verz) + '. Kijk één keer per jaar of de dekking nog bij je past.';
+      if (verz.length >= 2) tekst += ' Kijk ook of je iets dubbel hebt verzekerd. Reis, rechtsbijstand en aansprakelijkheid zitten vaak al in een pakket.';
+      acties.push({
+        id: 'verzekeringen', titel: nu ? 'Vergelijk je zorgverzekering voor 31 december' : verz.length >= 2 ? 'Loop je ' + verz.length + ' verzekeringen na' : 'Loop je verzekering na',
+        score: perJaar(verz) * (nu ? 0.16 : 0.08), items: verz, waarom: tekst, label: 'Het gaat om ' + euro(perJaar(verz), false) + ' per jaar'
       });
     }
 
     // energie
     var energie = r.vast.filter(function (s) { return s.cat === 'energie' && s.perMaand >= 40; });
     if (energie.length) {
-      adv.push({
-        id: 'energie', soort: 'check', bespaar: 0, sleutels: energie.map(function (s) { return s.sleutel; }),
-        titel: 'Vergelijk je energie één keer per jaar',
-        tekst: 'Je betaalt ' + euro(som(energie, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(energie.map(function (s) { return s.naam; })) +
-          '. Wie blijft zitten, betaalt meestal meer dan wie overstapt. Kijk wanneer je contract afloopt en vergelijk dan.'
+      acties.push({
+        id: 'energie', titel: 'Vergelijk je energie', score: perJaar(energie) * 0.08, items: energie,
+        waarom: 'Je betaalt ' + euro(som(energie, function (s) { return s.perMaand; }), false) + ' per maand aan ' + namen(energie) +
+          '. Wie blijft zitten, betaalt meestal meer dan wie overstapt. Kijk wanneer je contract afloopt en vergelijk dan.',
+        label: 'Het gaat om ' + euro(perJaar(energie), false) + ' per jaar'
       });
-    }
-
-    // verzekeringen
-    var verz = r.vast.filter(function (s) { return s.cat === 'verzekeringen'; });
-    if (verz.length) {
-      var zorg = verz.filter(function (s) { return s.soort === 'zorg'; });
-      var tekst = 'Je betaalt ' + euro(som(verz, function (s) { return s.perJaar; }), false) + ' per jaar aan ' + opsomming(verz.map(function (s) { return s.naam; })) + '. ';
-      tekst += verz.length >= 2 ? 'Kijk of je iets dubbel hebt verzekerd. Reis, rechtsbijstand en aansprakelijkheid zitten vaak ook in een pakket.' : 'Kijk één keer per jaar of de dekking nog bij je past.';
-      if (zorg.length && maandNu >= 11) tekst += ' Je zorgverzekering kun je tot en met 31 december opzeggen. De nieuwe premies staan nu online.';
-      else if (zorg.length) tekst += ' Je zorgverzekering kun je elk jaar in november en december vergelijken.';
-      adv.push({ id: 'verzekeringen', soort: 'check', bespaar: 0, sleutels: verz.map(function (s) { return s.sleutel; }), titel: verz.length >= 2 ? 'Loop je ' + verz.length + ' verzekeringen na' : 'Loop je verzekering na', tekst: tekst });
     }
 
     // telefoon en internet
     var tel = r.vast.filter(function (s) { return s.cat === 'telecom'; });
     if (tel.length) {
-      adv.push({
-        id: 'telecom', soort: 'check', bespaar: 0, sleutels: tel.map(function (s) { return s.sleutel; }),
-        titel: 'Loopt je contract voor telefoon of internet nog?',
-        tekst: 'Je betaalt ' + euro(som(tel, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(tel.map(function (s) { return s.naam; })) +
-          '. Is je contract afgelopen, dan betaal je vaak nog voor een toestel dat al van jou is. Sim only of opnieuw onderhandelen is dan goedkoper.'
-      });
-    }
-
-    // twee keer afgeschreven
-    if (r.dubbel.length) {
-      adv.push({
-        id: 'tweekeer', soort: 'check', bespaar: 0, sleutels: [],
-        titel: 'Mogelijk twee keer afgeschreven',
-        tekst: r.dubbel.slice(0, 4).map(function (t) { return t.winkel + ' op ' + datum(t.dag) + ': twee keer ' + euro(t.bedrag); }).join('. ') +
-          '. Klopt dat niet? Bij een incasso kun je het bedrag binnen acht weken laten terugboeken via je bank.'
-      });
-    }
-
-    // creditcard en andere rekeningen: wat ik niet zie
-    var cc = r.cat('creditcard');
-    if (cc.totaal >= 100) {
-      adv.push({
-        id: 'creditcard', soort: 'inzicht', bespaar: 0, sleutels: [],
-        titel: euro(cc.totaal, false) + ' via je creditcard',
-        tekst: 'Wat je met je creditcard betaalde, zie ik hier niet. Daar zitten vaak abonnementen tussen. Loop het overzicht van je creditcard apart na.'
+      acties.push({
+        id: 'telecom', titel: 'Check je contract voor telefoon en internet', score: perJaar(tel) * 0.08, items: tel,
+        waarom: 'Is je contract afgelopen, dan betaal je vaak nog voor een toestel dat al van jou is. Sim only of opnieuw onderhandelen is dan goedkoper.',
+        label: 'Het gaat om ' + euro(perJaar(tel), false) + ' per jaar'
       });
     }
 
     // achteraf betalen
-    var lenen = r.cat('lenen'), achteraf = lenen.winkels.filter(function (w) { return /klarna|riverty|in3|billink|tinka/i.test(w.naam); });
-    if (achteraf.length && som(achteraf, function (w) { return w.aantal; }) >= 4) {
-      adv.push({
-        id: 'achteraf', soort: 'check', bespaar: 0, sleutels: [],
-        titel: som(achteraf, function (w) { return w.aantal; }) + ' keer achteraf betaald',
-        tekst: 'Via ' + opsomming(achteraf.map(function (w) { return w.naam; })) + ', samen ' + euro(som(achteraf, function (w) { return w.totaal; }), false) +
-          '. Achteraf betalen maakt uitgeven makkelijker dan je wilt. Een gemiste termijn kost meteen geld.'
+    var achteraf = r.cat('lenen').winkels.filter(function (w) { return /klarna|riverty|in3|billink|tinka/i.test(w.naam); });
+    var keerAchteraf = som(achteraf, function (w) { return w.aantal; });
+    if (keerAchteraf >= 4) {
+      acties.push({
+        id: 'achteraf', titel: 'Let op met achteraf betalen', score: 30, items: [],
+        waarom: 'Je betaalde ' + keerAchteraf + ' keer achteraf via ' + opsomming(achteraf.map(function (w) { return w.naam; })) +
+          '. Dat maakt uitgeven makkelijker dan je wilt. Een gemiste termijn kost meteen geld.',
+        label: 'Samen ' + euro(som(achteraf, function (w) { return w.totaal; }), false)
       });
     }
 
-    // al opgezegd: goed gedaan
-    var weg = r.gestopt.filter(function (s) { return s.type === 'opzegbaar'; });
-    if (weg.length) {
-      adv.push({
-        id: 'gestopt', soort: 'inzicht', bespaar: 0, sleutels: [],
-        titel: 'Dit zegde je al op',
-        tekst: opsomming(weg.slice(0, 6).map(function (s) { return s.naam; })) + '. Dat scheelt ' + euro(som(weg, function (s) { return s.perJaar; }), false) + ' per jaar.'
+    // creditcard: wat ik niet zie
+    var cc = r.cat('creditcard');
+    if (cc.totaal >= 100) {
+      acties.push({
+        id: 'creditcard', titel: 'Loop je creditcard na', score: 20, items: [],
+        waarom: 'Wat je met je creditcard betaalde, zie ik hier niet. Daar zitten vaak abonnementen tussen.',
+        label: 'Het gaat om ' + euro(cc.totaal, false)
       });
     }
 
-    adv.sort(function (a, b) { return (a.soort === 'inzicht') - (b.soort === 'inzicht') || b.bespaar - a.bespaar; });
-    return adv;
-  }
-
-  /* ---------- je geldtype ---------- */
-
-  function geldtype(r) {
-    var a = function (id) { return r.cat(id).aandeel; };
-    var spaar = r.binnen > 0 ? (r.over) / r.binnen : 0;
-    var kandidaten = [
-      [r.opzegbaar.length / 9, 'De verzamelaar', 'Je hebt ' + r.opzegbaar.length + ' abonnementen lopen. Dat is meer dan de meeste mensen kunnen opnoemen.'],
-      [a('bezorgen') / 0.05, 'De thuisbezorger', 'De bezorger weet je adres uit zijn hoofd.'],
-      [spaar / 0.22, 'De bouwer', 'Van elke euro die binnenkwam, hield je ' + Math.round(spaar * 100) + ' cent over.'],
-      [(a('horeca') + a('uit')) / 0.13, 'De levensgenieter', 'Een tafel voor twee, een kaartje, nog een rondje. Je geld gaat naar momenten.'],
-      [a('boodschappen') / 0.2, 'De thuiskok', 'Je grootste vrije uitgave is de supermarkt. Je kookt zelf, en vaak.'],
-      [a('winkelen') / 0.14, 'De jager', 'Pakketjes weten je te vinden. Winkelen is je grootste verleiding.'],
-      [a('reizen') / 0.11, 'De reiziger', 'Je geeft je geld het liefst ergens anders uit.'],
-      [(r.uit > 0 ? r.vastPerJaar * r.periode.maanden / 12 / r.uit : 0) / 0.7, 'De vaste waarde', 'Het grootste deel van je geld is al weg voordat de maand begint.']
-    ].sort(function (x, y) { return y[0] - x[0]; });
-    var k = kandidaten[0][0] >= 0.75 ? kandidaten[0] : [1, 'De alleseter', 'Geen uitschieters. Je geld gaat een beetje overal heen.'];
-    return { naam: k[1], tekst: k[2] };
+    acties.sort(function (a, b) { return b.score - a.score; });
+    return acties;
   }
 
   /* ---------- samenvatting voor je AI: geen namen van personen, geen rekeningnummers ---------- */
@@ -2539,7 +2458,7 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
   root.MW = {
     leesING: leesING, maakData: maakData, periodes: periodes, analyseer: analyseer, samenvatting: samenvatting,
     euro: euro, getal: getal, datum: datum, maandJaar: maandJaar, meervoud: meervoud, opsomming: opsomming,
-    cats: R.cats, MAANDEN: MAANDEN
+    cats: R.cats, opzeggen: R.opzeggen || {}, MAANDEN: MAANDEN
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -2672,7 +2591,8 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>/* Money Wrapped: wat je ziet. Leest je bestand, laat de rekenkern (engine.js)
-   zijn werk doen en tekent het verhaal en het overzicht. */
+   zijn werk doen en tekent één kort overzicht: je jaar, drie acties en je
+   abonnementen. De rest zit ingeklapt onder "Meer inzicht". */
 (function () {
   'use strict';
 
@@ -2681,7 +2601,8 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
 
   var STIL = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var OPSLAG = 'mw-verplaatst';
-  var st = { lijsten: null, voorbeeld: false, data: null, periodes: [], periode: null, res: null, vink: {}, open: {}, dia: 0, dias: 0 };
+  var TOP_ACTIES = 3, TOP_ABOS = 5, TOP_CATS = 5;
+  var st = { lijsten: null, voorbeeld: false, data: null, periodes: [], periode: null, res: null, open: {} };
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
@@ -2722,20 +2643,25 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     files = Array.prototype.slice.call(files || []);
     if (!files.length) return;
     fout('');
-    Promise.all(files.map(leesBestand)).then(function (lijsten) { begin(lijsten, false); }, function (e) { fout(e.message); });
+    Promise.all(files.map(leesBestand)).then(function (lijsten) { begin(lijsten, false, true); }, function (e) { fout(e.message); });
   }
 
-  function begin(lijsten, voorbeeld) {
+  // voor het laden zie je de uitleg, erna alleen je overzicht
+  function wissel(metResultaat) {
+    $('start').hidden = metResultaat;
+    $('uitleg').hidden = metResultaat;
+    $('veilig').hidden = metResultaat;
+    $('resultaat').hidden = !metResultaat;
+  }
+
+  function begin(lijsten, voorbeeld, scroll) {
     try {
-      st.lijsten = lijsten; st.voorbeeld = voorbeeld; st.vink = {}; st.open = {}; st.periode = null;
+      st.lijsten = lijsten; st.voorbeeld = voorbeeld; st.open = {}; st.periode = null;
       reken();
     } catch (e) { fout(e.message); return; }
-    $('start').hidden = true;
-    $('uitleg').hidden = true;
-    $('resultaat').hidden = false;
-    teken(true);
-    var balk = $('balk');
-    if (balk.scrollIntoView) balk.scrollIntoView({ block: 'start', behavior: STIL ? 'auto' : 'smooth' });
+    wissel(true);
+    teken();
+    if (scroll && $('balk').scrollIntoView) $('balk').scrollIntoView({ block: 'start', behavior: STIL ? 'auto' : 'smooth' });
   }
 
   function reken() {
@@ -2748,21 +2674,18 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
 
   function opnieuw() {
     st.lijsten = null; st.data = null; st.res = null;
-    $('resultaat').hidden = true;
-    $('start').hidden = false;
-    $('uitleg').hidden = false;
+    wissel(false);
     $('bestand').value = '';
     $('start').scrollIntoView({ block: 'center', behavior: STIL ? 'auto' : 'smooth' });
   }
 
-  function teken(metVerhaal) {
+  function teken() {
     tekenBalk();
-    if (metVerhaal) tekenVerhaal();
-    tekenKort();
-    tekenMaanden();
+    tekenJaar();
+    tekenActies();
+    tekenAbos();
     tekenCats();
     tekenVast();
-    tekenAdvies();
     tekenGrootste();
     tekenAI();
   }
@@ -2770,7 +2693,7 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
   /* ---------- de balk ---------- */
 
   function tekenBalk() {
-    var r = st.res, d = st.data, html = '';
+    var d = st.data, html = '';
     html += '<p class="mw-bar-note">' + (st.voorbeeld
       ? '<strong>Dit is een voorbeeld met verzonnen cijfers.</strong> Laad je eigen bestand om je eigen jaar te zien.'
       : '<strong>Je eigen cijfers.</strong> ' + MW.getal(d.txs.length) + ' regels, van ' + datum(d.begin, true) + ' tot en met ' + datum(d.eind, true) + '.') + '</p>';
@@ -2783,173 +2706,116 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     if (Object.keys(eigenRegels()).length) html += '<button class="mw-link" type="button" data-actie="wis">Wis mijn eigen indeling</button>';
     html += '</div>';
     $('balk').innerHTML = html;
-    void r;
   }
 
-  /* ---------- het verhaal ---------- */
+  /* ---------- je jaar: vier cijfers, de grootste categorieën, de maanden ---------- */
 
-  var STREEP = '<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg>';
-  function streep(tekst) { return '<span class="u">' + esc(tekst) + STREEP + '</span>'; }
-  function teller(waarde, soort) {
-    return '<span data-tel="' + waarde + '" data-soort="' + soort + '">' + (soort === 'euro' ? euro(waarde, false) : MW.getal(waarde)) + '</span>';
-  }
-  function rang(lijst, max) {
-    return '<ol class="mw-rank">' + lijst.map(function (x) {
-      return '<li><span class="mw-rank-name">' + esc(x[0]) + '</span><span class="mw-rank-val">' + esc(x[1]) + '</span>' +
-        '<span class="mw-rank-track" style="width:' + Math.max(3, Math.round(x[2] / max * 100)) + '%"></span></li>';
-    }).join('') + '</ol>';
-  }
+  function tekenJaar() {
+    var r = st.res, P = r.periode, sal = r.inkomen.filter(function (c) { return c.id === 'salaris'; })[0];
+    $('jaar-kop').textContent = P.jaar ? 'Je jaar ' + P.jaar : P.id === '12m' ? 'Je laatste twaalf maanden' : 'Je overzicht';
 
-  function tekenVerhaal() {
-    var r = st.res, P = r.periode, dias = [];
-    var titel = P.jaar ? 'Jouw ' + P.jaar : P.id === '12m' ? 'Jouw laatste twaalf maanden' : 'Jouw geld';
-
-    dias.push('<p class="mw-kicker">Money Wrapped</p><p class="mw-big mw-word">' + esc(titel) + ' in ' + streep('geld.') + '</p>' +
-      '<p class="mw-line">' + MW.getal(r.aantal) + ' af- en bijschrijvingen. Eén verhaal.</p>');
-
-    dias.push('<p class="mw-kicker">Er ging uit</p><p class="mw-big">' + teller(Math.round(r.uit), 'euro') + '</p>' +
-      '<p class="mw-line">Dat is ' + euro(r.perDag, false) + ' per dag.</p>' +
-      '<p class="mw-sub">Er kwam ' + euro(r.binnen, false) + ' binnen.</p>');
-
-    if (r.cats.length) {
-      var top = r.cats.slice(0, 5);
-      dias.push('<p class="mw-kicker">Het meeste ging naar</p><p class="mw-big mw-word">' + streep(top[0].label) + '</p>' +
-        rang(top.map(function (c) { return [c.label, euro(c.totaal, false), c.totaal]; }), top[0].totaal));
-    }
-
-    if (r.bezoek.length) {
-      var b = r.bezoek.slice(0, 5);
-      dias.push('<p class="mw-kicker">Hier kwam je het vaakst</p><p class="mw-big mw-word">' + streep(b[0].naam) + '</p>' +
-        '<p class="mw-line">' + b[0].aantal + ' keer. Samen ' + euro(b[0].totaal, false) + '.</p>' +
-        rang(b.slice(1).map(function (w) { return [w.naam, w.aantal + ' keer', w.aantal]; }), b[0].aantal));
-    }
-
-    if (r.maanden.length >= 3 && r.duursteMaand) {
-      var maxM = Math.max.apply(null, r.maanden.map(function (m) { return m.uit; })) || 1;
-      var toon = r.maanden.slice(-14);
-      dias.push('<p class="mw-kicker">Je duurste maand</p><p class="mw-big mw-word">' + streep(hoofdletter(r.duursteMaand.naam)) + '</p>' +
-        '<p class="mw-line">' + euro(r.duursteMaand.uit, false) + '. Je rustigste maand was ' + r.rustigsteMaand.naam + '.</p>' +
-        '<div><div class="mw-mini">' + toon.map(function (m) {
-          return '<span' + (m === r.duursteMaand ? ' class="is-top"' : '') + ' style="height:' + Math.max(2, Math.round(m.uit / maxM * 100)) + '%"></span>';
-        }).join('') + '</div><div class="mw-mini-labels">' + toon.map(function (m) { return '<span>' + m.kort.charAt(0) + '</span>'; }).join('') + '</div></div>');
-    }
-
-    if (r.vast.length) {
-      dias.push('<p class="mw-kicker">Vaste lasten en abonnementen</p><p class="mw-big">' + teller(r.vast.length, 'getal') + '</p>' +
-        '<p class="mw-line">Samen ' + euro(r.vastPerMaand, false) + ' per maand.</p>' +
-        '<p class="mw-sub">Dat is weg voordat je iets hebt gedaan.</p>');
-    }
-
-    var bez = r.cat('bezorgen'), hor = r.cat('horeca');
-    if (bez.aantal >= 6) {
-      dias.push('<p class="mw-kicker">Eten laten bezorgen</p><p class="mw-big">' + teller(bez.aantal, 'getal') + ' keer</p>' +
-        '<p class="mw-line">Samen ' + euro(bez.totaal, false) + '. Gemiddeld ' + euro(bez.totaal / bez.aantal, false) + ' per keer.</p>');
-    } else if (hor.aantal >= 10) {
-      dias.push('<p class="mw-kicker">Uit eten en drinken</p><p class="mw-big">' + teller(hor.aantal, 'getal') + ' keer</p>' +
-        '<p class="mw-line">Samen ' + euro(hor.totaal, false) + '. Gemiddeld ' + euro(hor.totaal / hor.aantal, false) + ' per keer.</p>');
-    }
-
-    dias.push('<p class="mw-kicker">Jouw geldtype</p><p class="mw-big mw-word">' + streep(r.type.naam) + '</p>' +
-      '<p class="mw-line">' + esc(r.type.tekst) + '</p>');
-
-    if (r.opzegbaar.length) {
-      dias.push('<p class="mw-kicker">Wat je kunt opzeggen</p><p class="mw-big">' + teller(Math.round(r.opzegbaarPerJaar), 'euro') + '</p>' +
-        '<p class="mw-line">Dat kosten je ' + r.opzegbaar.length + ' abonnementen samen per jaar.</p>' +
-        '<p class="mw-sub">Kies hieronder wat weg mag.</p>');
-    } else {
-      dias.push('<p class="mw-kicker">En nu</p><p class="mw-big mw-word">Het hele ' + streep('overzicht.') + '</p>' +
-        '<p class="mw-line">Je vaste lasten, je categorieën en je advies staan hieronder.</p>');
-    }
-
-    $('dias').innerHTML = dias.map(function (h, i) { return '<div class="mw-slide" data-dia="' + i + '" aria-hidden="true">' + h + '</div>'; }).join('');
-    $('voortgang').innerHTML = dias.map(function () { return '<span></span>'; }).join('');
-    st.dias = dias.length;
-    toonDia(0);
-  }
-
-  function toonDia(i) {
-    i = Math.max(0, Math.min(st.dias - 1, i));
-    st.dia = i;
-    Array.prototype.forEach.call($('dias').children, function (el, k) {
-      el.classList.toggle('is-on', k === i);
-      el.setAttribute('aria-hidden', k === i ? 'false' : 'true');
-      if (k === i) Array.prototype.forEach.call(el.querySelectorAll('[data-tel]'), telOp);
-    });
-    Array.prototype.forEach.call($('voortgang').children, function (el, k) { el.classList.toggle('is-done', k <= i); });
-    $('terug').disabled = i === 0;
-    $('verder').textContent = i === st.dias - 1 ? 'Naar het overzicht' : i === 0 ? 'Begin' : 'Verder';
-  }
-
-  function telOp(el) {
-    var doel = +el.getAttribute('data-tel'), soort = el.getAttribute('data-soort');
-    function zet(x) { el.textContent = soort === 'euro' ? euro(x, false) : MW.getal(x); }
-    if (STIL || !window.requestAnimationFrame) { zet(doel); return; }
-    var start = 0, duur = 900;
-    zet(0);
-    window.requestAnimationFrame(function stap(nu) {
-      if (!start) start = nu;
-      var p = Math.min(1, (nu - start) / duur), e = 1 - Math.pow(1 - p, 3);
-      zet(Math.round(doel * e));
-      if (p < 1 && el.isConnected) window.requestAnimationFrame(stap);
-    });
-  }
-
-  function verder() {
-    if (st.dia >= st.dias - 1) { $('kort').scrollIntoView({ block: 'start', behavior: STIL ? 'auto' : 'smooth' }); return; }
-    toonDia(st.dia + 1);
-  }
-
-  /* ---------- in het kort ---------- */
-
-  function tekenKort() {
-    var r = st.res, sal = r.inkomen.filter(function (c) { return c.id === 'salaris'; })[0];
     function tegel(label, waarde, sub) {
       return '<div class="mw-tile"><span class="caps">' + label + '</span><span class="mw-tile-value">' + waarde + '</span><span class="mw-tile-sub">' + sub + '</span></div>';
     }
     $('tegels').innerHTML =
-      tegel('Uitgegeven', euro(r.uit, false), euro(r.perMaand, false) + ' per maand') +
       tegel('Binnengekomen', euro(r.binnen, false), sal ? 'waarvan ' + euro(sal.totaal, false) + ' salaris' : MW.meervoud(r.inkomen.length, 'bron', 'bronnen')) +
+      tegel('Uitgegeven', euro(r.uit, false), euro(r.perMaand, false) + ' per maand') +
       tegel(r.over >= 0 ? 'Over' : 'Tekort', euro(Math.abs(r.over), false),
         r.sparen > 0 ? euro(r.sparen, false) + ' ging naar sparen' : r.sparen < 0 ? euro(-r.sparen, false) + ' kwam van je spaargeld' : r.binnen > 0 ? Math.round(r.over / r.binnen * 100) + '% van wat binnenkwam' : '') +
       tegel('Vast per maand', euro(r.vastPerMaand, false), MW.meervoud(r.vast.length, 'vaste last', 'vaste lasten'));
-  }
 
-  /* ---------- per maand ---------- */
+    // de grootste categorieën, de rest in één regel
+    var top = r.cats.slice(0, TOP_CATS), rest = r.cats.slice(TOP_CATS), max = top.length ? top[0].totaal : 1;
+    var restTotaal = rest.reduce(function (t, c) { return t + c.totaal; }, 0);
+    $('top-cats').innerHTML = top.map(function (c) {
+      return '<li><span class="mw-topcats-name">' + esc(c.label) + '</span><span class="mw-topcats-val">' + euro(c.totaal, false) + '</span>' +
+        '<span class="mw-topcats-track"><span style="width:' + Math.max(1, c.totaal / max * 100).toFixed(1) + '%"></span></span></li>';
+    }).join('') + (rest.length ? '<li class="is-rest"><span class="mw-topcats-name">Nog ' + rest.length + ' categorieën</span><span class="mw-topcats-val">' +
+      euro(restTotaal, false) + '</span><span class="mw-topcats-track"><span style="width:' + Math.min(100, Math.max(1, restTotaal / max * 100)).toFixed(1) + '%"></span></span></li>' : '');
 
-  function mooiMax(x) {
-    var stap = Math.pow(10, Math.floor(Math.log(x) / Math.LN10)), opties = [1, 2, 2.5, 4, 5, 10];
-    for (var i = 0; i < opties.length; i++) if (opties[i] * stap >= x) return opties[i] * stap;
-    return 10 * stap;
+    tekenMaanden();
   }
 
   function tekenMaanden() {
-    var r = st.res, ms = r.maanden, max = mooiMax(Math.max.apply(null, ms.map(function (m) { return m.uit; }).concat([1])));
+    var r = st.res, ms = r.maanden, max = Math.max.apply(null, ms.map(function (m) { return m.uit; }).concat([1]));
     var heel = ms.filter(function (m) { return m.heel; }), gem = heel.length ? heel.reduce(function (t, m) { return t + m.uit; }, 0) / heel.length : r.perMaand;
     var meerJaar = ms.length && ms[0].jaar !== ms[ms.length - 1].jaar;
-    var html = '<div class="mw-plot">';
-    [0, 0.5, 1].forEach(function (f) {
-      html += '<div class="mw-gridline' + (f === 0 ? ' is-base' : '') + '" style="bottom:' + f * 100 + '%"><span>' + euro(max * f, false) + '</span></div>';
-    });
-    html += '<div class="mw-cols">' + ms.map(function (m) {
-      var h = Math.max(0, m.uit / max * 100), top = m === r.duursteMaand;
+    var html = '<div class="mw-plot"><div class="mw-cols">' + ms.map(function (m) {
+      var h = Math.max(0, m.uit / max * 100), top = m === r.duursteMaand && ms.length >= 3;
       return '<button class="mw-col' + (top ? ' is-top' : '') + (m.heel ? '' : ' is-part') + '" type="button" data-tip="<b>' + esc(hoofdletter(m.naam) + ' ' + m.jaar) + '</b>' +
         esc(euro(m.uit, false) + ' uit, ' + euro(m.binnen, false) + ' binnen' + (m.heel ? '' : '. Deze maand is niet compleet.')) + '" aria-label="' +
         esc(m.naam + ' ' + m.jaar + ': ' + euro(m.uit, false) + ' uit') + '"><span class="mw-col-bar" style="height:' + h.toFixed(1) + '%"></span>' +
         (top ? '<span class="mw-col-val" style="bottom:' + h.toFixed(1) + '%">' + euro(m.uit, false) + '</span>' : '') + '</button>';
     }).join('') + '</div>';
-    if (heel.length >= 3) html += '<div class="mw-avg" style="bottom:' + (gem / max * 100).toFixed(1) + '%"><span>gemiddeld ' + euro(gem, false) + '</span></div>';
+    if (heel.length >= 3) html += '<div class="mw-avg" style="bottom:' + (gem / max * 100).toFixed(1) + '%"></div>';
     html += '</div><div class="mw-xlabels' + (ms.length > 13 ? ' is-dense' : '') + '">' + ms.map(function (m) {
-      return '<span>' + m.kort + (meerJaar && m.maand === 1 ? ' ’' + String(m.jaar).slice(2) : '') + '</span>';
-    }).join('') + '</div>';
-    var deel = ms.filter(function (m) { return !m.heel; });
-    if (deel.length) html += '<p class="mw-chart-note">Lichte kolommen zijn maanden die niet compleet zijn.</p>';
-    $('maanden').innerHTML = html;
-    $('maand-tekst').innerHTML = r.duursteMaand && ms.length >= 3
-      ? 'Je gaf gemiddeld <strong>' + euro(gem, false) + '</strong> per maand uit. ' + hoofdletter(r.duursteMaand.naam) + ' was het duurst, ' + r.rustigsteMaand.naam + ' het rustigst.'
-      : 'Wat er per maand uitging.';
+      return '<span>' + (ms.length > 13 ? m.kort : m.kort.charAt(0)) + (meerJaar && m.maand === 1 && ms.length <= 13 ? '’' + String(m.jaar).slice(2) : '') + '</span>';
+    }).join('') + '</div><p class="mw-chart-note">';
+    if (heel.length >= 3) html += '<span><i></i>Gemiddeld ' + euro(gem, false) + ' per maand</span>';
+    if (ms.some(function (m) { return !m.heel; })) html += '<span>Licht: maand niet compleet</span>';
+    $('maanden').innerHTML = html + '</p>';
   }
 
-  /* ---------- categorieën ---------- */
+  /* ---------- opzeggen: de pagina van de aanbieder, of anders een zoekopdracht ---------- */
+
+  var PIJL = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9l6-6"/><path d="M4 3h5v5"/></svg>';
+  function opzegLink(s) {
+    var info = MW.opzeggen[s.naam], attrs = ' target="_blank" rel="noopener noreferrer"';
+    if (info) return '<a class="mw-go" href="' + esc(info.url) + '"' + attrs + '>' + (info.uitleg ? 'Zo zeg je op' : 'Opzeggen') + PIJL + '</a>';
+    return '<a class="mw-go is-zoek" href="https://www.google.com/search?q=' + encodeURIComponent(s.naam + ' abonnement opzeggen') + '"' + attrs + '>Zoek hoe je opzegt' + PIJL + '</a>';
+  }
+
+  // één regel voor een abonnement of vaste last
+  function regel(s, metLink, metCat) {
+    var r = st.res, bits = [];
+    if (metCat) bits.push(esc(MW.cats[s.cat].label));
+    if (s.stijging) bits.push('<b>Duurder geworden</b>, was ' + euro(s.stijging.van));
+    if (s.ritme.id === 'jaar' && s.volgende >= r.eind - 7 && s.volgende <= r.eind + 100) bits.push('<b>Verlengt rond ' + datum(s.volgende) + '</b>');
+    else if (s.onzeker) bits.push('Eén keer gezien, waarschijnlijk per jaar');
+    else if (s.eerste > st.data.begin + 40 && s.eerste >= r.periode.van) bits.push('Nieuw sinds ' + MW.maandJaar(s.eerste));
+    var perJaar = s.ritme.id === 'jaar';
+    return '<li class="mw-sub' + (metLink ? '' : ' no-link') + '"><div class="mw-sub-main"><span class="mw-sub-name">' + esc(s.naam) + '</span>' +
+      '<span class="mw-sub-note">' + (perJaar ? '' : euro(s.bedrag) + ' ' + s.ritme.label + (bits.length ? '. ' : '')) + bits.join('. ') + '</span></div>' +
+      '<div class="mw-sub-num"><span class="mw-sub-amount">' + euro(s.perJaar, false) + '</span><span class="mw-sub-per">per jaar</span></div>' +
+      (metLink ? opzegLink(s) : '') + '</li>';
+  }
+
+  /* ---------- je drie acties ---------- */
+
+  function actie(a, nummer) {
+    var metLink = !!a.opzeg;
+    return '<li class="mw-action"><span class="mw-action-num" aria-hidden="true">' + nummer + '</span><div class="mw-action-body"><h3>' + esc(a.titel) + '</h3>' +
+      '<p class="mw-action-why">' + esc(a.waarom) + '</p>' + (a.label ? '<p class="mw-action-save">' + esc(a.label) + '</p>' : '') +
+      (a.items.length ? '<ul class="mw-action-items">' + a.items.map(function (s) { return regel(s, metLink && s.type === 'opzegbaar', false); }).join('') + '</ul>' : '') +
+      '</div></li>';
+  }
+
+  function tekenActies() {
+    var acties = st.res.acties, top = acties.slice(0, TOP_ACTIES), rest = acties.slice(TOP_ACTIES);
+    $('acties').hidden = !acties.length;
+    $('acties-kop').textContent = top.length >= 3 ? 'Je drie acties' : top.length === 2 ? 'Je twee acties' : 'Je actie';
+    $('top-acties').innerHTML = top.map(function (a, i) { return actie(a, i + 1); }).join('');
+    $('meer-acties').hidden = !rest.length;
+    $('meer-acties').open = false;
+    $('meer-acties-tekst').textContent = 'Nog ' + MW.meervoud(rest.length, 'actie', 'acties');
+    $('rest-acties').innerHTML = rest.map(function (a, i) { return actie(a, i + 1 + TOP_ACTIES); }).join('');
+  }
+
+  /* ---------- je abonnementen ---------- */
+
+  function tekenAbos() {
+    var r = st.res, lijst = r.opzegbaar, top = lijst.slice(0, TOP_ABOS), rest = lijst.slice(TOP_ABOS);
+    $('abonnementen').hidden = !lijst.length;
+    $('abo-tekst').innerHTML = '<strong>' + MW.meervoud(lijst.length, 'abonnement', 'abonnementen') + '</strong> die je kunt opzeggen, samen <strong>' +
+      euro(r.opzegbaarPerJaar, false) + ' per jaar</strong>. De duurste staan bovenaan.';
+    $('abo-lijst').innerHTML = top.map(function (s) { return regel(s, true, false); }).join('');
+    $('meer-abos').hidden = !rest.length;
+    $('meer-abos').open = false;
+    $('meer-abos-tekst').textContent = 'Toon ook de andere ' + rest.length;
+    $('abo-rest').innerHTML = rest.map(function (s) { return regel(s, true, false); }).join('');
+  }
+
+  /* ---------- meer inzicht ---------- */
 
   var VERPLAATS = Object.keys(MW.cats).filter(function (k) { return k !== 'contant'; });
 
@@ -2972,28 +2838,11 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     }).join('');
   }
 
-  /* ---------- vaste lasten ---------- */
-
-  function rij(s, vinkbaar) {
-    var r = st.res, bits = [esc(MW.cats[s.cat].label)];
-    if (s.stijging) bits.push('<b>Duurder geworden.</b> Was ' + euro(s.stijging.van));
-    if (s.onzeker) bits.push('Eén keer gezien, waarschijnlijk per jaar');
-    if (s.ritme.id === 'jaar' && s.volgende >= r.eind - 7 && s.volgende <= r.eind + 100) bits.push('<b>Verlengt rond ' + datum(s.volgende) + '</b>');
-    else if (s.eerste > st.data.begin + 40 && s.eerste >= r.periode.van) bits.push('Nieuw sinds ' + MW.maandJaar(s.eerste));
-    var aan = !!st.vink[s.sleutel];
-    return '<li class="mw-row' + (vinkbaar ? '' : ' no-check') + (aan ? ' is-picked' : '') + '">' +
-      (vinkbaar ? '<label class="mw-check"><input type="checkbox" data-vink="' + esc(s.sleutel) + '"' + (aan ? ' checked' : '') +
-        ' aria-label="Zet ' + esc(s.naam) + ' op mijn opzeglijst"><span></span></label>' : '') +
-      '<div class="mw-row-main"><span class="mw-row-name">' + esc(s.naam) + '</span><span class="mw-row-note">' + bits.join('. ') + '.</span></div>' +
-      '<div class="mw-row-num"><span class="mw-row-amount">' + euro(s.bedrag) + '</span><span class="mw-row-year"><span>' + s.ritme.label + '</span>' +
-      (s.ritme.id === 'jaar' ? '' : '<span>' + euro(s.perJaar, false) + ' per jaar</span>') + '</span></div></li>';
-  }
-
-  function groep(titel, lede, lijst, vinkbaar) {
+  function groep(titel, lijst) {
     if (!lijst.length) return '';
     var totaal = lijst.reduce(function (t, s) { return t + s.perJaar; }, 0);
     return '<div class="mw-group"><div class="mw-group-head"><h3>' + titel + '</h3><p>' + lijst.length + ' stuks, ' + euro(totaal, false) + ' per jaar</p></div>' +
-      '<p class="mw-group-lede">' + lede + '</p><ul>' + lijst.map(function (s) { return rij(s, vinkbaar); }).join('') + '</ul></div>';
+      '<ul>' + lijst.map(function (s) { return regel(s, false, true); }).join('') + '</ul></div>';
   }
 
   function tekenVast() {
@@ -3001,51 +2850,17 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     function van(type) { return r.vast.filter(function (s) { return s.type === type; }); }
     var aandeel = r.perMaand > 0 ? Math.round(r.vastPerMaand / r.perMaand * 100) : 0;
     $('vast-tekst').innerHTML = r.vast.length
-      ? 'Elke maand ligt <strong>' + euro(r.vastPerMaand, false) + '</strong> vast' + (aandeel > 0 && aandeel <= 100 ? '. Dat is ' + aandeel + '% van wat je uitgeeft' : '') + '. Dit vond ik door te kijken wat steeds terugkomt.'
+      ? 'Elke maand ligt ' + euro(r.vastPerMaand, false) + ' vast' + (aandeel > 0 && aandeel <= 100 ? '. Dat is ' + aandeel + '% van wat je uitgeeft' : '') + '. Dit vond ik door te kijken wat steeds terugkomt.'
       : 'Ik vond geen betalingen die steeds terugkomen. Laad een langere periode, dan zie ik meer.';
-    $('opzegbaar').innerHTML = groep('Kun je opzeggen', 'Vink aan wat weg mag. Onderaan zie je wat het oplevert.', van('opzegbaar'), true);
-    var html = groep('Kun je overstappen', 'Hier heb je iets nodig, maar niet per se deze aanbieder.', van('overstappen'), false) +
-      groep('Ligt vast', 'Hier kom je niet zomaar vanaf.', van('vast'), false);
+    var html = groep('Kun je overstappen', van('overstappen')) + groep('Ligt vast', van('vast')) + groep('Kun je opzeggen', van('opzegbaar'));
     if (r.gestopt.length) {
       html += '<div class="mw-group"><div class="mw-group-head"><h3>Gestopt in deze periode</h3><p>' + r.gestopt.length + ' stuks</p></div><ul>' +
         r.gestopt.map(function (s) {
-          return '<li class="mw-row no-check"><div class="mw-row-main"><span class="mw-row-name">' + esc(s.naam) + '</span><span class="mw-row-note">Laatste keer op ' +
-            datum(s.laatste, true) + '.</span></div><div class="mw-row-num"><span class="mw-row-amount">' + euro(s.bedrag) + '</span><span class="mw-row-year">' + s.ritme.label + '</span></div></li>';
+          return '<li class="mw-sub no-link"><div class="mw-sub-main"><span class="mw-sub-name">' + esc(s.naam) + '</span><span class="mw-sub-note">Laatste keer op ' +
+            datum(s.laatste, true) + '</span></div><div class="mw-sub-num"><span class="mw-sub-amount">' + euro(s.perJaar, false) + '</span><span class="mw-sub-per">per jaar bespaard</span></div></li>';
         }).join('') + '</ul></div>';
     }
     $('vaste-lasten').innerHTML = html;
-    $('opzeg-totaal').hidden = !r.opzegbaar.length;
-    tekenOpzeg();
-  }
-
-  function tekenOpzeg() {
-    var r = st.res, gekozen = r.opzegbaar.filter(function (s) { return st.vink[s.sleutel]; });
-    var totaal = gekozen.reduce(function (t, s) { return t + s.perJaar; }, 0);
-    $('opzeg-tekst').innerHTML = gekozen.length
-      ? MW.meervoud(gekozen.length, 'abonnement', 'abonnementen') + ' op je opzeglijst. Dat scheelt <b>' + euro(totaal, false) + ' per jaar</b>.'
-      : 'Vink hierboven aan wat weg mag. Samen kosten deze abonnementen <b>' + euro(r.opzegbaarPerJaar, false) + ' per jaar</b>.';
-    var lijst = gekozen.length ? gekozen : r.opzegbaar;
-    $('opzeg-prompt').textContent =
-      'Help me deze abonnementen op te zeggen.\n\n' +
-      'Geef per abonnement:\n' +
-      '1. Hoe ik opzeg: de route in de app of op de website, of het adres voor een brief. Zoek het op als je kunt zoeken.\n' +
-      '2. De opzegtermijn en of er een jaarcontract kan lopen.\n' +
-      '3. Een korte opzegbrief of e-mail die ik zo kan versturen. Laat een plek open voor mijn naam en klantnummer.\n\n' +
-      'Weet je iets niet zeker, zeg dat erbij. Begin met het abonnement dat het meeste oplevert.\n\n' +
-      'MIJN OPZEGLIJST\n' + lijst.map(function (s) {
-        return '- ' + s.naam + ': ' + euro(s.bedrag) + ' ' + s.ritme.label + (s.ritme.id === 'jaar' ? ', verlengt rond ' + datum(s.volgende) : '');
-      }).join('\n');
-  }
-
-  /* ---------- advies, grootste uitgaven, AI ---------- */
-
-  function tekenAdvies() {
-    var r = st.res;
-    $('advies').hidden = !r.advies.length;
-    $('adviezen').innerHTML = r.advies.map(function (a, i) {
-      return '<li class="mw-adv' + (a.soort === 'inzicht' ? ' is-info' : '') + '"><span class="mw-adv-num" aria-hidden="true">' + (i + 1) + '</span><div class="mw-adv-body"><h3>' +
-        esc(a.titel) + '</h3><p>' + esc(a.tekst) + '</p>' + (a.bespaar >= 1 ? '<span class="mw-adv-save">Scheelt tot ' + euro(a.bespaar, false) + ' per jaar</span>' : '') + '</div></li>';
-    }).join('');
   }
 
   function tekenGrootste() {
@@ -3053,7 +2868,7 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     $('grootste').innerHTML = r.grootste.map(function (t) {
       return '<li><span>' + esc(t.winkel) + '<small>' + datum(t.dag, true) + ', ' + esc(MW.cats[t.cat].label.toLowerCase()) + '</small></span><span>' + euro(t.bedrag, false) + '</span></li>';
     }).join('');
-    $('grootste').parentNode.hidden = !r.grootste.length;
+    $('groot-vak').hidden = !r.grootste.length;
   }
 
   function tekenAI() {
@@ -3062,7 +2877,7 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
       'WAT IK VAN JE WIL\n' +
       '1. Noem de drie dingen die je het meest opvallen.\n' +
       '2. Loop mijn vaste lasten en abonnementen na. Wat is dubbel, wat is duur voor wat het is, en waar kan ik overstappen? Zoek actuele prijzen op als je kunt zoeken.\n' +
-      '3. Maak een lijst met wat ik deze week kan opzeggen of veranderen, met per punt wat het per jaar oplevert.\n' +
+      '3. Vraag me welke abonnementen ik wil opzeggen. Zoek per abonnement op waar en hoe ik opzeg en wat de opzegtermijn is. Schrijf een korte opzegbrief of e-mail, met een plek voor mijn naam en klantnummer.\n' +
       '4. Stel me daarna maximaal drie vragen waarmee je advies beter wordt.\n\n' +
       'Reken niets opnieuw uit en verzin geen bedragen. Weet je iets niet, zeg dat dan. Dit is geen financieel advies. Ik beslis zelf.\n\n' +
       'MIJN CIJFERS\n' + MW.samenvatting(st.res);
@@ -3085,30 +2900,23 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) laadBestanden(e.dataTransfer.files);
   });
   $('bestand').addEventListener('change', function () { laadBestanden(this.files); });
-  $('voorbeeld').addEventListener('click', toonVoorbeeld);
+  $('voorbeeld').addEventListener('click', function () { toonVoorbeeld(true); });
 
-  function toonVoorbeeld() { begin([MW.leesING(window.MW_DEMO.csv())], true); }
+  function toonVoorbeeld(scroll) {
+    try { begin([MW.leesING(window.MW_DEMO.csv())], true, scroll); }
+    catch (e) { fout(e.message); }
+  }
 
   $('balk').addEventListener('click', function (e) {
     var knop = e.target.closest ? e.target.closest('button') : null;
     if (!knop) return;
-    var id = knop.getAttribute('data-periode'), actie = knop.getAttribute('data-actie');
+    var id = knop.getAttribute('data-periode'), actieNaam = knop.getAttribute('data-actie');
     if (id) {
       st.periode = st.periodes.filter(function (p) { return p.id === id; })[0] || st.periode;
       st.res = MW.analyseer(st.data, st.periode);
-      st.vink = {};
-      teken(true);
-    } else if (actie === 'opnieuw') opnieuw();
-    else if (actie === 'wis') { bewaarRegels({}); reken(); teken(false); }
-  });
-
-  $('verder').addEventListener('click', verder);
-  $('tik-verder').addEventListener('click', verder);
-  $('terug').addEventListener('click', function () { toonDia(st.dia - 1); });
-  $('tik-terug').addEventListener('click', function () { toonDia(st.dia - 1); });
-  $('telefoon').addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight') { e.preventDefault(); if (st.dia < st.dias - 1) toonDia(st.dia + 1); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); toonDia(st.dia - 1); }
+      teken();
+    } else if (actieNaam === 'opnieuw') opnieuw();
+    else if (actieNaam === 'wis') { bewaarRegels({}); reken(); teken(); }
   });
 
   $('categorieen').addEventListener('toggle', function (e) {
@@ -3123,16 +2931,7 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
     bewaarRegels(regels);
     st.open[sel.value] = true;
     reken();
-    teken(false);
-  });
-
-  $('opzegbaar').addEventListener('change', function (e) {
-    var sleutel = e.target.getAttribute && e.target.getAttribute('data-vink');
-    if (!sleutel) return;
-    st.vink[sleutel] = e.target.checked;
-    var li = e.target.closest ? e.target.closest('.mw-row') : null;
-    if (li) li.classList.toggle('is-picked', e.target.checked);
-    tekenOpzeg();
+    teken();
   });
 
   // tekstballon bij de kolommen
@@ -3153,27 +2952,25 @@ Kun je de code niet openen, zeg dat dan en raad niet.</pre></li>
   $('maanden').addEventListener('click', function (e) { var el = tipDoel(e); if (el) toonTip(el); });
   window.addEventListener('scroll', function () { tip.hidden = true; }, { passive: true });
 
-  // offline: laat zien dat het dan ook werkt
+  // offline of vanaf je eigen computer: laat zien dat het dan ook werkt
   function toonOffline() {
     var los = window.location.protocol === 'file:', uit = window.navigator.onLine === false;
     $('offline-tekst').textContent = los ? 'Je werkt vanaf je eigen computer. Internet is niet nodig.' : 'Je bent offline. Het werkt gewoon.';
     $('offline').hidden = !(los || uit);
     $('offline-hier').hidden = !uit;
   }
+  window.addEventListener('online', toonOffline);
+  window.addEventListener('offline', toonOffline);
+  toonOffline();
+
   // de link in het vak opent het tabblad met de download
   if ($('naar-download')) $('naar-download').addEventListener('click', function () {
     $('tab-download').click();
     $('uitleg').scrollIntoView({ block: 'start', behavior: STIL ? 'auto' : 'smooth' });
   });
-  window.addEventListener('online', toonOffline);
-  window.addEventListener('offline', toonOffline);
-  toonOffline();
 
   // het voorbeeld meteen openen: via #voorbeeld in het adres, of als de pagina erom vraagt
-  if (window.MW_START_VOORBEELD || window.location.hash === '#voorbeeld') {
-    try { st.lijsten = [MW.leesING(window.MW_DEMO.csv())]; st.voorbeeld = true; reken(); $('start').hidden = true; $('uitleg').hidden = true; $('resultaat').hidden = false; teken(true); }
-    catch (e) { fout(e.message); }
-  }
+  if (window.MW_START_VOORBEELD || window.location.hash === '#voorbeeld') toonVoorbeeld(false);
 })();
 </script>
 </body>

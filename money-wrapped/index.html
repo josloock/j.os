@@ -8,6 +8,7 @@
 <title>Money Wrapped · J.OS</title>
 <meta name="description" content="Je jaar in een overzicht, met adviezen waar veel geld heengaat en wat je kan opzeggen.">
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#F2EEE6">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
@@ -96,7 +97,7 @@ Kies je bestand
 <span class="step-num" aria-hidden="true">3</span>
 <div class="step-body">
 <h3>Bekijk je jaar</h3>
-<p>Eerst je jaar in een paar beelden. Daarna het hele overzicht, je vaste lasten en wat je kunt opzeggen.</p>
+<p>Je ziet je jaar in één overzicht, met de drie dingen waar je het meeste aan hebt. Bij elk abonnement staat waar je opzegt.</p>
 <p class="say">&lsquo;Waar ging mijn <span class="u">geld heen?<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 15 C 60 7, 140 6, 200 9 S 280 14, 296 8"/></svg></span>&rsquo;</p>
 </div>
 </li>
@@ -149,72 +150,67 @@ Download Money Wrapped
 
 <div class="mw-bar" id="balk"></div>
 
-<section class="mw-story" id="verhaal" aria-label="Je jaar in beelden" aria-roledescription="carrousel">
-<div class="mw-phone" id="telefoon" tabindex="0">
-<div class="mw-progress" id="voortgang" aria-hidden="true"></div>
-<div class="mw-slides" id="dias" aria-live="polite"></div>
-<button class="mw-tap mw-tap-prev" type="button" id="tik-terug" tabindex="-1" aria-hidden="true"></button>
-<button class="mw-tap mw-tap-next" type="button" id="tik-verder" tabindex="-1" aria-hidden="true"></button>
-<div class="mw-nav">
-<button class="mw-nav-btn" type="button" id="terug">Terug</button>
-<button class="mw-nav-btn mw-nav-next" type="button" id="verder">Verder</button>
-</div>
-</div>
-<p class="mw-skip"><a href="#kort">Sla over, naar het overzicht</a></p>
-</section>
-
-<section class="section" id="kort" aria-labelledby="kort-kop">
-<h2 class="caps caps-wide center" id="kort-kop">In het kort</h2>
+<section class="mw-year" id="jaar" aria-labelledby="jaar-kop">
+<h2 class="caps caps-wide center" id="jaar-kop">Je jaar</h2>
 <div class="mw-tiles" id="tegels"></div>
-</section>
-
-<section class="section" aria-labelledby="maand-kop">
-<h2 class="caps caps-wide center" id="maand-kop">Per maand</h2>
-<p class="mw-lead" id="maand-tekst"></p>
-<div class="mw-chart" id="maanden"></div>
-</section>
-
-<section class="section" aria-labelledby="cat-kop">
-<h2 class="caps caps-wide center" id="cat-kop">Waar het heen ging</h2>
-<p class="mw-lead">Klik op een regel voor de winkels erachter. Staat er iets verkeerd, verplaats het dan.</p>
-<div class="mw-cats" id="categorieen"></div>
-</section>
-
-<section class="section" id="vast" aria-labelledby="vast-kop">
-<h2 class="caps caps-wide center" id="vast-kop">Vaste lasten en abonnementen</h2>
-<p class="mw-lead" id="vast-tekst"></p>
-<div id="opzegbaar"></div>
-<div class="mw-total" id="opzeg-totaal">
-<p class="mw-total-text" id="opzeg-tekst" aria-live="polite"></p>
-<button class="button" type="button" data-copy="#opzeg-prompt">
-<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
-<span>Kopieer mijn opzeglijst</span>
-</button>
-<p class="hint">Plak hem in Claude of ChatGPT. Je krijgt per abonnement hoe je opzegt en een brief die je kunt versturen.</p>
-<pre class="prompt" id="opzeg-prompt" tabindex="0"></pre>
+<div class="mw-two">
+<div>
+<h3 class="caps">Waar het heen ging</h3>
+<ol class="mw-topcats" id="top-cats"></ol>
 </div>
+<div>
+<h3 class="caps">Per maand</h3>
+<div class="mw-chart" id="maanden"></div>
+</div>
+</div>
+</section>
+
+<section class="section" id="acties" aria-labelledby="acties-kop">
+<h2 class="caps caps-wide center" id="acties-kop">Je drie acties</h2>
+<ol class="mw-actions" id="top-acties"></ol>
+<details class="mw-meer" id="meer-acties">
+<summary><span id="meer-acties-tekst">Meer acties</span></summary>
+<ol class="mw-actions mw-actions-rest" id="rest-acties"></ol>
+</details>
+</section>
+
+<section class="section" id="abonnementen" aria-labelledby="abo-kop">
+<h2 class="caps caps-wide center" id="abo-kop">Je abonnementen</h2>
+<p class="mw-lead" id="abo-tekst"></p>
+<ul class="mw-subs" id="abo-lijst"></ul>
+<details class="mw-meer" id="meer-abos">
+<summary><span id="meer-abos-tekst">Toon alle</span></summary>
+<ul class="mw-subs" id="abo-rest"></ul>
+</details>
+<p class="mw-foot-note">Een link opent de website van de aanbieder. Daar log je zelf in. Staat er geen opzegpagina bij, dan zoekt de link hem voor je op.</p>
+</section>
+
+<section class="section" id="meer" aria-labelledby="meer-kop">
+<h2 class="caps caps-wide center" id="meer-kop">Meer inzicht</h2>
+<div class="mw-folds">
+<details class="mw-fold">
+<summary>Alle categorieën en winkels</summary>
+<p class="mw-fold-lede">Klik op een regel voor de winkels erachter. Staat er iets verkeerd, verplaats het dan.</p>
+<div class="mw-cats" id="categorieen"></div>
+</details>
+<details class="mw-fold">
+<summary>Alle vaste lasten</summary>
+<p class="mw-fold-lede" id="vast-tekst"></p>
 <div id="vaste-lasten"></div>
-</section>
-
-<section class="section" id="advies" aria-labelledby="advies-kop">
-<h2 class="caps caps-wide center" id="advies-kop">Advies</h2>
-<ol class="mw-advice" id="adviezen"></ol>
-</section>
-
-<section class="section" aria-labelledby="groot-kop">
-<h2 class="caps caps-wide center" id="groot-kop">Grootste losse uitgaven</h2>
+</details>
+<details class="mw-fold" id="groot-vak">
+<summary>Grootste losse uitgaven</summary>
 <ul class="mw-list" id="grootste"></ul>
-</section>
-
-<section class="section" aria-labelledby="ai-kop">
-<h2 class="caps caps-wide center" id="ai-kop">Laat je AI meedenken</h2>
-<div class="mw-ai">
-<p>Wil je verder dan deze pagina? Kopieer een samenvatting met een prompt erbij en plak hem in je AI. Er staan geen namen van personen en geen rekeningnummers in. Je ziet hieronder precies wat je kopieert.</p>
+</details>
+<details class="mw-fold">
+<summary>Verder met je AI</summary>
+<p class="mw-fold-lede">Kopieer een samenvatting met een prompt erbij en plak hem in Claude of ChatGPT. Je AI denkt mee, zoekt op hoe je opzegt en schrijft de opzegbrieven. Er staan geen namen van personen en geen rekeningnummers in. Hieronder zie je precies wat je kopieert.</p>
 <button class="button" type="button" data-copy="#ai-prompt">
 <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="6" y="6" width="9" height="10" rx="1.5"/><path d="M12 6V3.5A1.5 1.5 0 0 0 10.5 2h-6A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H6"/></svg>
 <span>Kopieer samenvatting en prompt</span>
 </button>
 <pre class="prompt" id="ai-prompt" tabindex="0"></pre>
+</details>
 </div>
 </section>
 

@@ -69,6 +69,7 @@ kop = """<!doctype html>
 <meta http-equiv="Content-Security-Policy" content="%s">
 <title>Money Wrapped</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#F2EEE6">
 <style>
 %s

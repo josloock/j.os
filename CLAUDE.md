@@ -52,17 +52,23 @@ daarop voordat hij live gaat.
 
 ## Money Wrapped
 
-Je sleept een export van ING in de pagina en krijgt je jaar in beelden, een
-overzicht en advies. Alles wordt in de browser uitgerekend. Er gaat niets naar
+Je sleept een export van ING in de pagina en krijgt één kort financieel
+jaaroverzicht: vier cijfers, de drie acties waar je het meeste aan hebt, en je
+abonnementen met bij elk waar je opzegt. De rest zit ingeklapt onder "Meer
+inzicht". Houd het kort: geen lange pagina en geen verhaal in dia's. Alles
+wordt in de browser uitgerekend. Er gaat niets naar
 een server of een AI. Dat is de belofte van deze toepassing: voeg dus nooit iets
 toe dat gegevens verstuurt. De pagina dwingt dit af met een Content-Security-
 Policy (`connect-src 'none'`). Verander je het kleine script in de `<head>`, dan
 moet de hash in die regel mee veranderen.
 
-- `regels.js`: categorieën en de namen van winkels en abonnementen. Hier voeg je
-  een winkel toe. Bovenaan staat hoe een regel werkt.
-- `engine.js`: leest het bestand, herkent vaste lasten en maakt het advies. Geen
-  schermcode, dus te testen met `node`.
+- `regels.js`: categorieën, de namen van winkels en abonnementen, en onderaan de
+  opzegpagina per abonnement (`OPZEGGEN`). Hier voeg je een winkel toe. Bovenaan
+  staat hoe een regel werkt. Zet alleen een opzegpagina erbij die je hebt
+  gecontroleerd en die op de site van de aanbieder zelf staat. Staat er geen,
+  dan toont de pagina een zoeklink.
+- `engine.js`: leest het bestand, herkent vaste lasten en maakt de acties, de
+  belangrijkste eerst (`maakActies`). Geen schermcode, dus te testen met `node`.
 - `demo.js`: het voorbeeld met verzonnen cijfers, in het formaat van ING.
 - `app.js` en `wrapped.css`: wat je ziet.
 

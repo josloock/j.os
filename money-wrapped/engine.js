@@ -504,21 +504,21 @@
       dubbel: dubbel, eind: data.eind, begin: data.begin
     };
     res.cat = function (id) { return cats[id] || { id: id, label: R.cats[id].label, totaal: 0, aantal: 0, winkels: [], aandeel: 0 }; };
-    res.advies = maakAdvies(res);
-    res.type = geldtype(res);
+    res.acties = maakActies(res);
     return res;
   }
 
-  /* ---------- het advies ---------- */
+  /* ---------- de acties: wat je met dit overzicht kunt doen, de belangrijkste eerst ---------- */
 
+  // per soort: [hoe het heet, de actie, de reden erbij]
   var SOORTEN = {
-    video: ['streamingdiensten', 'Kijk je ze echt allemaal tegelijk? Houd er één aan en wissel per maand. Je zegt ze per maand op en bent zo weer terug.'],
-    muziek: ['muziekdiensten', 'Eén is genoeg. Je muziek en je lijsten neem je mee.'],
-    opslag: ['diensten voor opslag', 'Kies één plek voor je foto’s en bestanden.'],
-    ai: ['AI-abonnementen', 'Kies er één voor dagelijks werk. Een tweede neem je alleen de maand dat je hem nodig hebt.'],
-    nieuws: ['abonnementen op nieuws', 'Lees je ze allemaal? Kranten geven vaak korting als je wilt opzeggen.'],
-    boeken: ['abonnementen op boeken', 'Luister of lees je bij allebei?'],
-    sportschool: ['sportabonnementen', 'Naar welke ga je echt?']
+    video: ['streamingdiensten', 'Houd één streamingdienst aan', 'Wissel per maand. Je zegt zo op en bent zo weer terug.'],
+    muziek: ['muziekdiensten', 'Kies één muziekdienst', 'Je muziek en je lijsten neem je mee.'],
+    opslag: ['diensten voor opslag', 'Kies één plek voor je opslag', 'Zet je foto’s en bestanden bij elkaar.'],
+    ai: ['AI-abonnementen', 'Kies één AI-abonnement', 'Een tweede neem je alleen de maand dat je hem nodig hebt.'],
+    nieuws: ['abonnementen op nieuws', 'Kies welk nieuws je echt leest', 'Kranten geven vaak korting als je wilt opzeggen.'],
+    boeken: ['abonnementen op boeken', 'Kies één abonnement op boeken', 'Luister of lees je bij allebei?'],
+    sportschool: ['sportabonnementen', 'Kies één sportabonnement', 'Naar welke ga je echt?']
   };
 
   function opsomming(lijst) {
@@ -526,64 +526,77 @@
     return lijst.slice(0, -1).join(', ') + ' en ' + lijst[lijst.length - 1];
   }
 
-  function maakAdvies(r) {
-    var adv = [], P = r.periode, gebruikt = {};
+  function maakActies(r) {
+    var acties = [], P = r.periode, gebruikt = {};
     var maandNu = datumVan(r.eind).getUTCMonth() + 1;
+    function perJaar(lijst) { return som(lijst, function (s) { return s.perJaar; }); }
+    function namen(lijst) { return opsomming(lijst.map(function (s) { return s.naam; })); }
 
-    // dubbele abonnementen
+    // dubbel: twee of meer van hetzelfde
     Object.keys(SOORTEN).forEach(function (soort) {
       var lijst = r.vast.filter(function (s) { return s.soort === soort; });
       if (lijst.length < 2) return;
-      var totaal = som(lijst, function (s) { return s.perJaar; }), duurste = Math.max.apply(null, lijst.map(function (s) { return s.perJaar; }));
+      var totaal = perJaar(lijst), duurste = Math.max.apply(null, lijst.map(function (s) { return s.perJaar; }));
       lijst.forEach(function (s) { gebruikt[s.sleutel] = 1; });
-      adv.push({
-        id: 'dubbel-' + soort, soort: 'actie', bespaar: totaal - duurste, sleutels: lijst.map(function (s) { return s.sleutel; }),
-        titel: 'Je betaalt voor ' + lijst.length + ' ' + SOORTEN[soort][0],
-        tekst: opsomming(lijst.map(function (s) { return s.naam; })) + '. Samen ' + euro(totaal, false) + ' per jaar. ' + SOORTEN[soort][1]
+      acties.push({
+        id: 'dubbel-' + soort, titel: SOORTEN[soort][1], score: totaal - duurste, items: lijst, opzeg: true,
+        waarom: 'Je betaalt voor ' + lijst.length + ' ' + SOORTEN[soort][0] + ' tegelijk, samen ' + euro(totaal, false) + ' per jaar. ' + SOORTEN[soort][2],
+        label: 'Scheelt tot ' + euro(totaal - duurste, false) + ' per jaar'
       });
     });
+
+    // twee keer afgeschreven: geld dat je terug kunt halen
+    if (r.dubbel.length) {
+      var terug = som(r.dubbel, function (t) { return t.bedrag; });
+      acties.push({
+        id: 'tweekeer', titel: 'Vraag je geld terug', score: terug + 150, items: [],
+        waarom: r.dubbel.slice(0, 3).map(function (t) { return t.winkel + ' schreef op ' + datum(t.dag) + ' twee keer ' + euro(t.bedrag) + ' af'; }).join('. ') +
+          '. Klopt dat niet? Een incasso kun je binnen acht weken laten terugboeken via je bank.',
+        label: 'Levert ' + euro(terug) + ' op'
+      });
+    }
 
     // jaarabonnementen die binnenkort verlengen
     var straks = r.vast.filter(function (s) { return s.ritme.id === 'jaar' && s.type !== 'vast' && s.volgende >= r.eind - 7 && s.volgende <= r.eind + 100; });
     if (straks.length) {
-      adv.push({
-        id: 'verlenging', soort: 'actie', bespaar: 0, sleutels: straks.map(function (s) { return s.sleutel; }),
-        titel: straks.length === 1 ? 'Dit jaarabonnement wordt binnenkort verlengd' : 'Deze jaarabonnementen worden binnenkort verlengd',
-        tekst: opsomming(straks.map(function (s) { return s.naam + ' rond ' + datum(s.volgende) + ' (' + euro(s.bedrag, false) + ')'; })) +
-          '. Wil je ervan af? Zeg dan nu op. Na de verlenging zit je vaak weer een jaar vast.'
+      acties.push({
+        id: 'verlenging', score: perJaar(straks) * 1.2, items: straks, opzeg: true,
+        titel: straks.length === 1 ? 'Beslis over ' + straks[0].naam + ' voor ' + datum(straks[0].volgende) : 'Zeg op voordat het verlengt',
+        waarom: (straks.length === 1 ? 'Dit jaarabonnement wordt' : 'Deze ' + straks.length + ' jaarabonnementen worden') + ' binnenkort verlengd. Daarna zit je vaak weer een jaar vast.',
+        label: 'Scheelt ' + euro(perJaar(straks), false) + ' als je opzegt'
       });
     }
 
     // duurder geworden
-    var duurder = r.vast.filter(function (s) { return s.stijging && s.stijging.perJaar >= 6 && s.type !== 'vast'; }).sort(function (a, b) { return b.stijging.perJaar - a.stijging.perJaar; });
+    var duurder = r.vast.filter(function (s) { return s.stijging && s.stijging.perJaar >= 6 && s.type !== 'vast'; })
+      .sort(function (a, b) { return b.stijging.perJaar - a.stijging.perJaar; });
     if (duurder.length) {
-      adv.push({
-        id: 'duurder', soort: 'check', bespaar: 0, sleutels: duurder.map(function (s) { return s.sleutel; }),
-        titel: (duurder.length === 1 ? duurder[0].naam + ' is' : duurder.length + ' vaste lasten zijn') + ' duurder geworden',
-        tekst: duurder.slice(0, 5).map(function (s) {
-          return s.naam + ' ging van ' + euro(s.stijging.van) + ' naar ' + euro(s.stijging.naar) + ' ' + s.ritme.label;
-        }).join('. ') + '. Samen ' + euro(som(duurder, function (s) { return s.stijging.perJaar; }), false) + ' per jaar meer. Is het je dat nog waard?'
+      var meer = som(duurder, function (s) { return s.stijging.perJaar; });
+      acties.push({
+        id: 'duurder', titel: 'Loop na wat duurder werd', score: meer * 0.5, items: duurder, opzeg: true,
+        waarom: (duurder.length === 1 ? duurder[0].naam + ' kost' : duurder.length + ' vaste lasten kosten samen') + ' meer dan een jaar geleden. Is het je dat nog waard?',
+        label: 'Kost je ' + euro(meer, false) + ' per jaar meer'
       });
     }
 
     // klein en vergeten
     var klein = r.opzegbaar.filter(function (s) { return s.perMaand <= 10 && !gebruikt[s.sleutel]; });
     if (klein.length >= 2) {
-      adv.push({
-        id: 'klein', soort: 'check', bespaar: 0, sleutels: klein.map(function (s) { return s.sleutel; }),
-        titel: klein.length + ' kleine abonnementen onder de tien euro',
-        tekst: opsomming(klein.slice(0, 8).map(function (s) { return s.naam; })) + '. Samen ' + euro(som(klein, function (s) { return s.perJaar; }), false) +
-          ' per jaar. Kleine bedragen vallen niet op. Weet je bij elk nog waarvoor het is?'
+      acties.push({
+        id: 'klein', titel: 'Ruim je kleine abonnementen op', score: perJaar(klein) * 0.5, items: klein, opzeg: true,
+        waarom: klein.length + ' abonnementen onder de tien euro per maand. Kleine bedragen vallen niet op. Weet je bij elk nog waarvoor het is?',
+        label: 'Samen ' + euro(perJaar(klein), false) + ' per jaar'
       });
     }
 
     // loterijen
-    var lot = r.cat('loterij');
+    var loten = r.vast.filter(function (s) { return s.cat === 'loterij'; }), lot = r.cat('loterij');
     if (lot.totaal >= 60) {
-      adv.push({
-        id: 'loterij', soort: 'check', bespaar: 0, sleutels: r.vast.filter(function (s) { return s.cat === 'loterij'; }).map(function (s) { return s.sleutel; }),
-        titel: euro(lot.totaal / P.maanden * 12, false) + ' per jaar aan loterijen',
-        tekst: opsomming(lot.winkels.slice(0, 4).map(function (w) { return w.naam; })) + '. Heb je weleens uitgerekend wat je ervoor terugkreeg?'
+      var lotJaar = lot.totaal / P.maanden * 12;
+      acties.push({
+        id: 'loterij', titel: 'Reken je loterij na', score: lotJaar * 0.5, items: loten, opzeg: true,
+        waarom: 'Je betaalt ' + euro(lotJaar, false) + ' per jaar aan loten. Heb je weleens uitgerekend wat je ervoor terugkreeg?',
+        label: 'Samen ' + euro(lotJaar, false) + ' per jaar'
       });
     }
 
@@ -591,108 +604,71 @@
     var bez = r.cat('bezorgen');
     if (bez.aantal >= 6) {
       var gem = bez.totaal / bez.aantal;
-      adv.push({
-        id: 'bezorgen', soort: 'actie', bespaar: gem * 12, sleutels: [],
-        titel: bez.aantal + ' keer eten laten bezorgen',
-        tekst: 'Samen ' + euro(bez.totaal, false) + ', gemiddeld ' + euro(gem, false) + ' per keer. Eén keer per maand minder scheelt ' + euro(gem * 12, false) + ' per jaar.'
+      acties.push({
+        id: 'bezorgen', titel: 'Bestel één keer per maand minder', score: gem * 12 * 0.6, items: [],
+        waarom: 'Je liet ' + bez.aantal + ' keer eten bezorgen voor ' + euro(bez.totaal, false) + '. Dat is gemiddeld ' + euro(gem, false) + ' per keer.',
+        label: 'Scheelt ' + euro(gem * 12, false) + ' per jaar'
+      });
+    }
+
+    // verzekeringen
+    var verz = r.vast.filter(function (s) { return s.cat === 'verzekeringen'; }), zorg = verz.filter(function (s) { return s.soort === 'zorg'; });
+    if (verz.length) {
+      var nu = zorg.length && maandNu >= 11, tekst;
+      if (nu) tekst = 'Je betaalt ' + euro(perJaar(zorg), false) + ' per jaar aan ' + namen(zorg) + '. Half november zijn de nieuwe premies bekend en je kunt tot en met 31 december overstappen.';
+      else tekst = 'Je betaalt ' + euro(perJaar(verz), false) + ' per jaar aan ' + namen(verz) + '. Kijk één keer per jaar of de dekking nog bij je past.';
+      if (verz.length >= 2) tekst += ' Kijk ook of je iets dubbel hebt verzekerd. Reis, rechtsbijstand en aansprakelijkheid zitten vaak al in een pakket.';
+      acties.push({
+        id: 'verzekeringen', titel: nu ? 'Vergelijk je zorgverzekering voor 31 december' : verz.length >= 2 ? 'Loop je ' + verz.length + ' verzekeringen na' : 'Loop je verzekering na',
+        score: perJaar(verz) * (nu ? 0.16 : 0.08), items: verz, waarom: tekst, label: 'Het gaat om ' + euro(perJaar(verz), false) + ' per jaar'
       });
     }
 
     // energie
     var energie = r.vast.filter(function (s) { return s.cat === 'energie' && s.perMaand >= 40; });
     if (energie.length) {
-      adv.push({
-        id: 'energie', soort: 'check', bespaar: 0, sleutels: energie.map(function (s) { return s.sleutel; }),
-        titel: 'Vergelijk je energie één keer per jaar',
-        tekst: 'Je betaalt ' + euro(som(energie, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(energie.map(function (s) { return s.naam; })) +
-          '. Wie blijft zitten, betaalt meestal meer dan wie overstapt. Kijk wanneer je contract afloopt en vergelijk dan.'
+      acties.push({
+        id: 'energie', titel: 'Vergelijk je energie', score: perJaar(energie) * 0.08, items: energie,
+        waarom: 'Je betaalt ' + euro(som(energie, function (s) { return s.perMaand; }), false) + ' per maand aan ' + namen(energie) +
+          '. Wie blijft zitten, betaalt meestal meer dan wie overstapt. Kijk wanneer je contract afloopt en vergelijk dan.',
+        label: 'Het gaat om ' + euro(perJaar(energie), false) + ' per jaar'
       });
-    }
-
-    // verzekeringen
-    var verz = r.vast.filter(function (s) { return s.cat === 'verzekeringen'; });
-    if (verz.length) {
-      var zorg = verz.filter(function (s) { return s.soort === 'zorg'; });
-      var tekst = 'Je betaalt ' + euro(som(verz, function (s) { return s.perJaar; }), false) + ' per jaar aan ' + opsomming(verz.map(function (s) { return s.naam; })) + '. ';
-      tekst += verz.length >= 2 ? 'Kijk of je iets dubbel hebt verzekerd. Reis, rechtsbijstand en aansprakelijkheid zitten vaak ook in een pakket.' : 'Kijk één keer per jaar of de dekking nog bij je past.';
-      if (zorg.length && maandNu >= 11) tekst += ' Je zorgverzekering kun je tot en met 31 december opzeggen. De nieuwe premies staan nu online.';
-      else if (zorg.length) tekst += ' Je zorgverzekering kun je elk jaar in november en december vergelijken.';
-      adv.push({ id: 'verzekeringen', soort: 'check', bespaar: 0, sleutels: verz.map(function (s) { return s.sleutel; }), titel: verz.length >= 2 ? 'Loop je ' + verz.length + ' verzekeringen na' : 'Loop je verzekering na', tekst: tekst });
     }
 
     // telefoon en internet
     var tel = r.vast.filter(function (s) { return s.cat === 'telecom'; });
     if (tel.length) {
-      adv.push({
-        id: 'telecom', soort: 'check', bespaar: 0, sleutels: tel.map(function (s) { return s.sleutel; }),
-        titel: 'Loopt je contract voor telefoon of internet nog?',
-        tekst: 'Je betaalt ' + euro(som(tel, function (s) { return s.perMaand; }), false) + ' per maand aan ' + opsomming(tel.map(function (s) { return s.naam; })) +
-          '. Is je contract afgelopen, dan betaal je vaak nog voor een toestel dat al van jou is. Sim only of opnieuw onderhandelen is dan goedkoper.'
-      });
-    }
-
-    // twee keer afgeschreven
-    if (r.dubbel.length) {
-      adv.push({
-        id: 'tweekeer', soort: 'check', bespaar: 0, sleutels: [],
-        titel: 'Mogelijk twee keer afgeschreven',
-        tekst: r.dubbel.slice(0, 4).map(function (t) { return t.winkel + ' op ' + datum(t.dag) + ': twee keer ' + euro(t.bedrag); }).join('. ') +
-          '. Klopt dat niet? Bij een incasso kun je het bedrag binnen acht weken laten terugboeken via je bank.'
-      });
-    }
-
-    // creditcard en andere rekeningen: wat ik niet zie
-    var cc = r.cat('creditcard');
-    if (cc.totaal >= 100) {
-      adv.push({
-        id: 'creditcard', soort: 'inzicht', bespaar: 0, sleutels: [],
-        titel: euro(cc.totaal, false) + ' via je creditcard',
-        tekst: 'Wat je met je creditcard betaalde, zie ik hier niet. Daar zitten vaak abonnementen tussen. Loop het overzicht van je creditcard apart na.'
+      acties.push({
+        id: 'telecom', titel: 'Check je contract voor telefoon en internet', score: perJaar(tel) * 0.08, items: tel,
+        waarom: 'Is je contract afgelopen, dan betaal je vaak nog voor een toestel dat al van jou is. Sim only of opnieuw onderhandelen is dan goedkoper.',
+        label: 'Het gaat om ' + euro(perJaar(tel), false) + ' per jaar'
       });
     }
 
     // achteraf betalen
-    var lenen = r.cat('lenen'), achteraf = lenen.winkels.filter(function (w) { return /klarna|riverty|in3|billink|tinka/i.test(w.naam); });
-    if (achteraf.length && som(achteraf, function (w) { return w.aantal; }) >= 4) {
-      adv.push({
-        id: 'achteraf', soort: 'check', bespaar: 0, sleutels: [],
-        titel: som(achteraf, function (w) { return w.aantal; }) + ' keer achteraf betaald',
-        tekst: 'Via ' + opsomming(achteraf.map(function (w) { return w.naam; })) + ', samen ' + euro(som(achteraf, function (w) { return w.totaal; }), false) +
-          '. Achteraf betalen maakt uitgeven makkelijker dan je wilt. Een gemiste termijn kost meteen geld.'
+    var achteraf = r.cat('lenen').winkels.filter(function (w) { return /klarna|riverty|in3|billink|tinka/i.test(w.naam); });
+    var keerAchteraf = som(achteraf, function (w) { return w.aantal; });
+    if (keerAchteraf >= 4) {
+      acties.push({
+        id: 'achteraf', titel: 'Let op met achteraf betalen', score: 30, items: [],
+        waarom: 'Je betaalde ' + keerAchteraf + ' keer achteraf via ' + opsomming(achteraf.map(function (w) { return w.naam; })) +
+          '. Dat maakt uitgeven makkelijker dan je wilt. Een gemiste termijn kost meteen geld.',
+        label: 'Samen ' + euro(som(achteraf, function (w) { return w.totaal; }), false)
       });
     }
 
-    // al opgezegd: goed gedaan
-    var weg = r.gestopt.filter(function (s) { return s.type === 'opzegbaar'; });
-    if (weg.length) {
-      adv.push({
-        id: 'gestopt', soort: 'inzicht', bespaar: 0, sleutels: [],
-        titel: 'Dit zegde je al op',
-        tekst: opsomming(weg.slice(0, 6).map(function (s) { return s.naam; })) + '. Dat scheelt ' + euro(som(weg, function (s) { return s.perJaar; }), false) + ' per jaar.'
+    // creditcard: wat ik niet zie
+    var cc = r.cat('creditcard');
+    if (cc.totaal >= 100) {
+      acties.push({
+        id: 'creditcard', titel: 'Loop je creditcard na', score: 20, items: [],
+        waarom: 'Wat je met je creditcard betaalde, zie ik hier niet. Daar zitten vaak abonnementen tussen.',
+        label: 'Het gaat om ' + euro(cc.totaal, false)
       });
     }
 
-    adv.sort(function (a, b) { return (a.soort === 'inzicht') - (b.soort === 'inzicht') || b.bespaar - a.bespaar; });
-    return adv;
-  }
-
-  /* ---------- je geldtype ---------- */
-
-  function geldtype(r) {
-    var a = function (id) { return r.cat(id).aandeel; };
-    var spaar = r.binnen > 0 ? (r.over) / r.binnen : 0;
-    var kandidaten = [
-      [r.opzegbaar.length / 9, 'De verzamelaar', 'Je hebt ' + r.opzegbaar.length + ' abonnementen lopen. Dat is meer dan de meeste mensen kunnen opnoemen.'],
-      [a('bezorgen') / 0.05, 'De thuisbezorger', 'De bezorger weet je adres uit zijn hoofd.'],
-      [spaar / 0.22, 'De bouwer', 'Van elke euro die binnenkwam, hield je ' + Math.round(spaar * 100) + ' cent over.'],
-      [(a('horeca') + a('uit')) / 0.13, 'De levensgenieter', 'Een tafel voor twee, een kaartje, nog een rondje. Je geld gaat naar momenten.'],
-      [a('boodschappen') / 0.2, 'De thuiskok', 'Je grootste vrije uitgave is de supermarkt. Je kookt zelf, en vaak.'],
-      [a('winkelen') / 0.14, 'De jager', 'Pakketjes weten je te vinden. Winkelen is je grootste verleiding.'],
-      [a('reizen') / 0.11, 'De reiziger', 'Je geeft je geld het liefst ergens anders uit.'],
-      [(r.uit > 0 ? r.vastPerJaar * r.periode.maanden / 12 / r.uit : 0) / 0.7, 'De vaste waarde', 'Het grootste deel van je geld is al weg voordat de maand begint.']
-    ].sort(function (x, y) { return y[0] - x[0]; });
-    var k = kandidaten[0][0] >= 0.75 ? kandidaten[0] : [1, 'De alleseter', 'Geen uitschieters. Je geld gaat een beetje overal heen.'];
-    return { naam: k[1], tekst: k[2] };
+    acties.sort(function (a, b) { return b.score - a.score; });
+    return acties;
   }
 
   /* ---------- samenvatting voor je AI: geen namen van personen, geen rekeningnummers ---------- */
@@ -725,6 +701,6 @@
   root.MW = {
     leesING: leesING, maakData: maakData, periodes: periodes, analyseer: analyseer, samenvatting: samenvatting,
     euro: euro, getal: getal, datum: datum, maandJaar: maandJaar, meervoud: meervoud, opsomming: opsomming,
-    cats: R.cats, MAANDEN: MAANDEN
+    cats: R.cats, opzeggen: R.opzeggen || {}, MAANDEN: MAANDEN
   };
 })(typeof window !== 'undefined' ? window : globalThis);
