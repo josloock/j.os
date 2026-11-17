@@ -10,8 +10,8 @@
   var STILL = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var TAU = 6.2832;
   // plek van elk punt ten opzichte van het midden van de bol, in bolstralen
-  var START_WIDE = [0, -1.52], START_NARROW = [0, -1.7];
-  var WIDE = [[-1.9, -0.3], [1.88, -0.14], [-1.34, 1.0], [1.44, 1.04], [1.42, -1.14], [-1.42, -1.14]];
+  var START_WIDE = [-0.66, -1.42], START_NARROW = [0, -1.7];
+  var WIDE = [[-1.9, -0.3], [1.88, -0.14], [-1.34, 1.0], [1.44, 1.04], [1.42, -1.14], [-1.74, -1.0]];
   var NARROW = [[-1.05, 1.62], [1.05, 1.62], [0, 2.75]];
 
   // een nieuwe pagina opent altijd bovenaan (terug en vooruit houden hun plek)
@@ -349,6 +349,7 @@
         (link ? '' : '<span class="node-note">Binnenkort</span>') + '</span>';
       stage.appendChild(el);
       var node = { el: el, li: li, live: !!link, start: start, slot: -1, x: 0, y: 0, shown: false,
+        half: el.querySelector('.node-dot').offsetHeight / 2 || 8,
         p1: Math.random() * TAU, p2: Math.random() * TAU, p3: Math.random() * TAU, sparks: [], next: 2.5 + Math.random() * 3 };
       function on() { hot = index; el.classList.add('hot'); li.classList.add('hot'); }
       function off() { if (hot === index) hot = -1; el.classList.remove('hot'); li.classList.remove('hot'); }
@@ -451,21 +452,21 @@
         var bend = STILL ? 0 : Math.sin(t * 0.4 + nd.p2) * 0.14;
         if (span > 6) {
           var bw = nd.el.offsetWidth / 2 + 8, bh = nd.el.offsetHeight;
-          var top = up ? ny + 7 - bh - 8 : ny + 16, bottom = up ? ny - 16 : ny - 7 + bh + 8;
+          var top = up ? ny + nd.half - bh - 8 : ny + nd.half + 9, bottom = up ? ny - nd.half - 9 : ny - nd.half + bh + 8;
           ctx.fillStyle = color;
-          ctx.globalAlpha = ((nd.live ? 0.62 : 0.36) + (isHot ? 0.3 : 0)) * born;
-          for (var q = 0; q <= span; q += 8) {
+          ctx.globalAlpha = ((nd.live ? 0.66 : 0.24) + (isHot ? 0.3 : 0)) * born;
+          for (var q = 0; q <= span; q += nd.live ? 8 : 13) {
             var u = q / span, sway = Math.sin(u * Math.PI) * bend * span;
             var qx = cx + ux * (s0 + q) - uy * sway, qy = cy + uy * (s0 + q) + ux * sway;
             if (qy > top && qy < bottom && Math.abs(qx - nx) < bw) continue;
             ctx.beginPath(); ctx.arc(qx, qy, 1, 0, TAU); ctx.fill();
           }
           // vonkjes die van het wezen naar het punt reizen
-          if (!STILL && out >= 1) {
+          if (!STILL && out >= 1 && nd.live) {
             if (L.fresh) nd.sparks.push({ t0: t + 0.5 + Math.random() * 1.2, dur: 1.1 + Math.random() * 0.5, big: true });
             if (t > nd.next) {
               nd.sparks.push({ t0: t, dur: 1.2 + Math.random() * 0.8, big: false });
-              nd.next = t + (nd.live ? 1.4 + Math.random() * 3.2 : 4 + Math.random() * 6) / (isHot ? 3 : 1);
+              nd.next = t + (1.4 + Math.random() * 3.2) / (isHot ? 3 : 1);
             }
             for (var s = nd.sparks.length - 1; s >= 0; s--) {
               var sp = nd.sparks[s], ph = (t - sp.t0) / sp.dur;
@@ -487,7 +488,7 @@
 
         nd.x = nx; nd.y = ny; nd.shown = out > 0.98;
         nd.el.classList.toggle('node-up', up);
-        nd.el.style.transform = 'translate(' + nx.toFixed(1) + 'px,' + ny.toFixed(1) + 'px) translate(-50%, ' + (up ? 'calc(-100% + 7px)' : '-7px') + ')';
+        nd.el.style.transform = 'translate(' + nx.toFixed(1) + 'px,' + ny.toFixed(1) + 'px) translate(-50%, ' + (up ? 'calc(-100% + ' + nd.half + 'px)' : '-' + nd.half + 'px') + ')';
         nd.el.style.opacity = clamp(out * 3, 0, 1).toFixed(3);
         nd.el.style.setProperty('--grow', (0.25 + 0.75 * out).toFixed(3));
         nd.el.style.setProperty('--label', clamp((out - 0.75) / 0.25, 0, 1).toFixed(3));
